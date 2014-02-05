@@ -27,9 +27,21 @@ var github = (function(){
             if (aDate === bDate) { return 0; }
             return aDate > bDate ? -1 : 1;
           });
-
-          if (options.count) { repos.splice(options.count); }
-          render(options.target, repos);
+          if (options.repos !== null && options.repos.length > 0) {
+              var specificRepos = [];
+              for (var i = 0; i < repos.length; i++) {
+                  var sr = repos[i];
+                  for (var j = 0; j < options.repos.length; j++) {
+                      if (options.repos[j] === sr.name) {
+                          specificRepos.push(sr);
+                      }
+                  }
+               }
+               render(options.target, specificRepos);
+          } else if (options.count > 0) { 
+              repos.splice(options.count);
+              render(options.target, repos);
+          }
         }
       });
     }
