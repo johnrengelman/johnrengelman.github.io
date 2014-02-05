@@ -7,8 +7,7 @@ title: Imperceptible Thoughts
 subtitle: 
 author: John Engelman
 simple_search: http://google.com/search
-description:
-The incoherent, incomprehensible, inconceivable, and incrementally intelligent ramblings of John Engelman
+description: The incoherent, incomprehensible, inconceivable, and incrementally intelligent ramblings of John Engelman
 # Default date format is "ordinal" (resulting in "July 22nd 2007")
 # You can customize the format as defined in
 # http://www.ruby-doc.org/core-1.9.2/Time.html#method-i-strftime
