@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: github pages | My Octopress Blog]]></title>
-  <link href="http://yoursite.com/blog/categories/github-pages/atom.xml" rel="self"/>
-  <link href="http://yoursite.com/"/>
-  <updated>2014-12-12T08:35:36-06:00</updated>
-  <id>http://yoursite.com/</id>
+  <title><![CDATA[Category: github pages | Imperceptible Thoughts]]></title>
+  <link href="http://johnrengelman.github.io/blog/categories/github-pages/atom.xml" rel="self"/>
+  <link href="http://johnrengelman.github.io/"/>
+  <updated>2014-12-12T09:28:48-06:00</updated>
+  <id>http://johnrengelman.github.io/</id>
   <author>
-    <name><![CDATA[Your Name]]></name>
+    <name><![CDATA[John Engelman]]></name>
     
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Yet Another Blog Hosting Change]]></title>
-    <link href="http://yoursite.com/blog/2014/02/05/yet-another-blog-hosting-change/"/>
+    <link href="http://johnrengelman.github.io/blog/2014/02/05/yet-another-blog-hosting-change/"/>
     <updated>2014-02-05T09:12:38-06:00</updated>
-    <id>http://yoursite.com/blog/2014/02/05/yet-another-blog-hosting-change</id>
+    <id>http://johnrengelman.github.io/blog/2014/02/05/yet-another-blog-hosting-change</id>
     <content type="html"><![CDATA[<p>Only a few months ago, I decided to switch my personal blog (which isn&rsquo;t maintained very well)
 from a privately hosted Wordpress installation on a server in my basement to Tumblr. There
 were a lot of reasons for this but the biggest was, I&rsquo;m not very interested in maintaining that
