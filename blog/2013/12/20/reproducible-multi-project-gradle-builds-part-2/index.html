@@ -1,0 +1,381 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Reproducible Multi-Project Gradle builds (Part 2) - Imperceptible Thoughts</title>
+  <meta name="author" content="John Engelman">
+
+  
+  <meta name="description" content="Follow up to my previous post -&nbsp;Reproducible Multi-Project Gradle builds I got around to doing some testing on this using a simple Gradle &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://johnrengelman.github.io/blog/2013/12/20/reproducible-multi-project-gradle-builds-part-2/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Imperceptible Thoughts" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:johnrengelman.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+    <li><a href="/">
+        <span class="blue_light">
+            Imperceptible Thoughts
+        </span>
+       
+    </a></li>
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Reproducible Multi-Project Gradle Builds (Part 2)</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-12-20T10:02:15-06:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Follow up to my previous post -&nbsp;<a href="http://imperceptiblethoughts.com/post/70296784559/reproducible-multi-project-gradle-builds"><span>Reproducible Multi-Project Gradle builds</span></a></p>
+
+
+<p><span>I got around to doing some testing on this using a simple Gradle project. Very quickly did I find out that this particular strategy was not going to be easy&#8230;.and potentially impossible.</span></p>
+
+
+<p><strong>Problem 1 - Setting Timestamp value on Jar Entry&#8217;s</strong></p>
+
+
+<p>The first problem I ran into was actually setting the timestamp value of a Jar Entry. My first attempt looked something like this:</p>
+
+
+<p><a class="gist" href="https://gist.github.com/johnrengelman/8055368.js?file=build-1a.gradle">Build-1a.gradle</a></p>
+
+
+<p>Yup. That didn&#8217;t work. Jar&#8217;s are more or less read-only. So in order to change the time stamp, I needed to write out a new Jar file with the modified entries. Basically, create a new jar file, iterate over the entries from the first jar file, clone them, modified the time stamp, add the cloned entry to the new jar file and then binary copy the data from the first jar file to the second. It looks something like this:</p>
+
+
+<p><a class="gist" href="https://gist.github.com/johnrengelman/8055368.js?file=build-1b.gradle">Build-1b.gradle</a></p>
+
+
+<p><strong>Problem 2 - JAR &#8220;Magic&#8221; Extra Byte</strong></p>
+
+
+<p>The next issue I encountered was that my new Jar file always had an entry that didn&#8217;t match the original Jar for it&#8217;s &#8216;extra&#8217; property. JarEntry.geExtra() returns a byte[]. In the orignal file, this was null, but in my copied file it was set to some data. I finally found that it is from the implementation of <a href="http://grepcode.com/file/repository.grepcode.com/java/root/jdk/openjdk/7-b147/java/util/jar/JarOutputStream.java">JarOutputStream</a> in Java.</p>
+
+
+<p>This Jar MAGIC byte gets added to the first entry in the Jar file. I haven&#8217;t been able to find any documentation on what it is for, but a friend thought it was likely for the Jar tool itself to determine if an archive file is actually a Jar.</p>
+
+
+<p>Curiously, Jar files produced by the Gradle Jar task, do NOT have this magic byte. Digging into their code, I found that they use a ZipOutputStream to write out the Jar file which doesn&#8217;t have this magic byte code. Using ZipOutputStream and ZipEntry works just as fine and avoids this, so we update the build to do the same:</p>
+
+
+<p><a class="gist" href="https://gist.github.com/johnrengelman/8055368.js?file=build-2.gradle">Build-2.gradle</a></p>
+
+
+<p><strong>Problem 3 - Zip timestamp spec</strong></p>
+
+
+<p>After all this, I still wasn&#8217;t getting subsequent builds of the Jar to have matching checksums. I wrote a method that at the end of producing the timestamp adjusted Jar iterated over all the entries and compared all the fields to the original except the time field which I compared to the expected time stamp. Looks like this:</p>
+
+
+<p><a class="gist" href="https://gist.github.com/johnrengelman/8055368.js?file=build-3a.gradle">Build-3a.gradle</a></p>
+
+
+<p>This showed me that some entries still didn&#8217;t have the same timestamp. Curiously, they were always off by 1 second (1000 milliseconds in the script). Digging back into the Java source code for <a href="http://grepcode.com/file/repository.grepcode.com/java/root/jdk/openjdk/7-b147/java/util/zip/ZipEntry.java#ZipEntry.setTime%28long%29">ZipEntry</a>, I found it was doing some sort of unix - DOS conversion and was losing the resolution of the time.</p>
+
+
+<p>After a call out to the Twitterverse, a friend pointed out that the <a href="http://ant.apache.org/manual/Tasks/zip.html">Zip Spec</a> specifies that Zip entries have a time resolution of 2 seconds:</p>
+
+
+<blockquote>
+<p><span>The&nbsp;</span><code>update</code><span>&nbsp;parameter controls what happens if the ZIP file already exists. When set to&nbsp;</span><code>yes</code><span>, the ZIP file is updated with the files specified. (New files are added; old files are replaced with the new versions.) When set to&nbsp;</span><code>no</code><span>&nbsp;(the default) the ZIP file is overwritten if any of the files that would be added to the archive are newer than the entries inside the archive. Please note that ZIP files store file modification times with a granularity of two seconds. If a file is less than two seconds newer than the entry in the archive, Apache Ant will not consider it newer.</span></p>
+</blockquote>
+
+
+<p>So, we need to mimic this same behavior when producing our new Jar. Basically, we need to convert our timestamp to a resolution of 2 seconds. It looks like this:</p>
+
+
+<p><a class="gist" href="https://gist.github.com/johnrengelman/8055368.js?file=build-3b.gradle">Build-3b.gradle</a></p>
+
+
+<p><strong>Problem 4 - Groovy _timestamp static field</strong></p>
+
+
+<p>This got my Jars closer, but they still weren&#8217;t checksumming the same. At this point, I started using a hex viewer to compare the two files. I used <a href="http://ridiculousfish.com/hexfiend/">Hex Fiend</a>&nbsp;because it can do a side by side diff of files and is free.&nbsp;</p>
+
+
+<p>Using a Hex viewer on a Jar file doesn&#8217;t do much since the data is compressed, but it can get you pointed in the right direction. In my cause I could see some byte differences around what appeared to be some class declarations</p>
+
+
+<p><img alt="image" src="https://31.media.tumblr.com/2fc2021f78566cce91727188d905e78c/tumblr_inline_my43h20E3u1rid3vx.png" /></p>
+
+
+<p></p>
+
+
+<p>Next step was to explode the Jars and compare each of the files. This should a pretty apparent difference</p>
+
+
+<p><img alt="image" src="https://31.media.tumblr.com/bac60decc770e66835f1cc2e70e43d7d/tumblr_inline_my43jc5nNP1rid3vx.png" /></p>
+
+
+<p></p>
+
+
+<p>There was a binary difference in the class file produced by subsequent compilations. The difference was related to a filed named &#8220;__timestamp_239_neverHappen1387492963633&#8221;.&nbsp;</p>
+
+
+<p>That&#8217;s an interesting field, because there&#8217;s nothing like that in my source file:</p>
+
+
+<p><a class="gist" href="https://gist.github.com/johnrengelman/8055368.js?file=EchoApp.groovy">EchoApp.groovy</a></p>
+
+
+<p>Opening the .class file with a Java Decompiler (JD-GUI in this case), we see this for the class:</p>
+
+
+<p><a class="gist" href="https://gist.github.com/johnrengelman/8055368.js?file=EchoApp.class">EchoApp.class</a></p>
+
+
+<p>There is in fact a private variable being initialized. Opening the other copy of this class revealed that the name of this variable was changing:</p>
+
+
+<blockquote>
+<p>__timeStamp__239_neverHappen1387493347537 = l1;</p>
+<p>vs.</p>
+<p>__timeStamp__239_neverHappen1387492963633 = l1;</p>
+</blockquote>
+
+
+<p>Hmmm. That&#8217;s odd. A little more digging lead me to this <a href="https://jira.codehaus.org/browse/GROOVY-6308" title="Groovy-6308: Timestamps in bytecode prevents baselining of code">Groovy-6308</a>. The title of this bug is &#8220;Timestamps in bytecode prevents baselining of code&#8221;. Yup, this seems to be my problem.</p>
+
+
+<p>It appears this field is injected as some sort of addition to SerialVersionUUID, though the corresponding conversations of that bug and the related bugs seems to indicate that it&#8217;s not really used for anything.</p>
+
+
+<p>Unfortunately, the bugs are listed as being targeted for Groovy 3.0 which doesn&#8217;t help me in the near term.</p>
+
+
+<p>At this point, since it&#8217;s a compiler function that&#8217;s stopping me, I&#8217;m not sure I have a path forward. This will probably get back burnered for a while since it&#8217;s not critical and more of a thought experiment than anything.</p>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">John Engelman</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-12-20T10:02:15-06:00" pubdate data-updated="true"></time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://johnrengelman.github.io/blog/2013/12/20/reproducible-multi-project-gradle-builds-part-2/" data-via="johnrengelman" data-counturl="http://johnrengelman.github.io/blog/2013/12/20/reproducible-multi-project-gradle-builds-part-2/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/12/17/reproducible-multi-project-gradle-builds/" title="Previous Post: Reproducible Multi-Project Gradle builds">&laquo; Reproducible Multi-Project Gradle builds</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/01/27/grails-gradle-plugin-200-released/" title="Next Post: Grails-Gradle Plugin 2.0.0 Released">Grails-Gradle Plugin 2.0.0 Released &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/02/05/yet-another-blog-hosting-change/">Yet Another Blog Hosting Change</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/01/27/grails-gradle-plugin-200-released/">Grails-Gradle Plugin 2.0.0 Released</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/12/20/reproducible-multi-project-gradle-builds-part-2/">Reproducible Multi-Project Gradle builds (Part 2)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/12/17/reproducible-multi-project-gradle-builds/">Reproducible Multi-Project Gradle builds</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/10/08/change-of-heart/">Change of heart&#8230;.</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <a class="twitter-timeline" data-dnt="true" href="https://twitter.com/johnrengelman"  data-widget-id="543422609292288000"  data-link-color="#1863a1" data-tweet-limit="5" data-chrome="noheader nofooter transparent noscrollbar">Tweets by @johnrengelman</a>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+  </ul>
+  
+    <p>Follow <a href="http://twitter.com/johnrengelman">@johnrengelman</a></p>
+  
+</section>
+
+
+
+
+
+
+<section>
+  <h1>About Me</h1>
+  <div id="twitter-profile" style="margin-top:0.5em;">
+    <p>
+      <strong>John Engelman</strong> 
+      (<a href="http://twitter.com/johnrengelman">@johnrengelman</a>)
+    </p>
+    <p>incoherent, incomprehensible, inconceivable, and incrementally intelligible ramblings</p>
+  </div>
+  <script type="text/javascript">
+    $(function(){
+        var container = $('#twitter-profile'),
+            user = "johnrengelman";
+        
+        function parseTwLinks(s) {
+          var twUrl = "http://www.twitter.com/"
+          s = s.replace(/ (@([\w]+))/g, function(match, p1, p2) {
+              return " <a href='"+twUrl+p2+"'>"+p1+"</a>"
+          }).replace(/ (#([\w]+))/g, function(match, p1, p2) {
+              return " <a href='"+twUrl+"#!/search?q=%23"+p2+"'>"+p1+"</a>"
+          })
+          return s
+        }
+
+        $.ajax({
+            url: "http://api.twitter.com/1/users/show.json?include_entities=false&screen_name="+user+"&callback=?"
+          , type: 'GET'
+          , dataType: 'jsonp'
+          , error: function (err) { $('#twitter-profile').addClass('error');  }
+          , success: function(data) {
+              container.html('<img class="left" src="http://api.twitter.com/1/users/profile_image/'+user+'.json?size=bigger" alt="@'+user+'"><p><strong>'+data.name+'</strong> (<a href="http://twitter.com/'+user+'">@'+user+'</a>)<br/>'+data.location+'</p><p>'+parseTwLinks(data.description)+'</p>');
+            }
+        })
+      });
+  </script>
+</section>
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - John Engelman -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

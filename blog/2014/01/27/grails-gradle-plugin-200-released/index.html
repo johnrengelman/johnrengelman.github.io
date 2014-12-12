@@ -5,12 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Yet Another Blog Hosting Change - Imperceptible Thoughts</title>
+  <title>Grails-Gradle Plugin 2.0.0 Released - Imperceptible Thoughts</title>
   <meta name="author" content="John Engelman">
 
   
-  <meta name="description" content="Only a few months ago, I decided to switch my personal blog (which isn&rsquo;t maintained very well)
-from a privately hosted Wordpress installation &hellip;">
+  <meta name="description" content="I am happy to announce that the 2.0.0 release for the Grails-Gradle plugin has finally been released. This release has been a long time coming, and &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -19,7 +18,7 @@ from a privately hosted Wordpress installation &hellip;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://johnrengelman.github.io/blog/2014/02/05/yet-another-blog-hosting-change/">
+  <link rel="canonical" href="http://johnrengelman.github.io/blog/2014/01/27/grails-gradle-plugin-200-released/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/javascripts/modernizr-2.0.js"></script>
@@ -66,7 +65,7 @@ from a privately hosted Wordpress installation &hellip;">
   
   <header>
     
-      <h1 class="entry-title">Yet Another Blog Hosting Change</h1>
+      <h1 class="entry-title">Grails-Gradle Plugin 2.0.0 Released</h1>
     
     
       <p class="meta">
@@ -82,35 +81,34 @@ from a privately hosted Wordpress installation &hellip;">
   
 
 
-<time datetime="2014-02-05T09:12:38-06:00" pubdate data-updated="true"></time>
+<time datetime="2014-01-27T12:09:47-06:00" pubdate data-updated="true"></time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><p>Only a few months ago, I decided to switch my personal blog (which isn&rsquo;t maintained very well)
-from a privately hosted Wordpress installation on a server in my basement to Tumblr. There
-were a lot of reasons for this but the biggest was, I&rsquo;m not very interested in maintaining that
-server anymore.</p>
-
-<!-- more -->
+<div class="entry-content"><p>I am happy to announce that the 2.0.0 release for the Grails-Gradle plugin has finally been released.</p>
 
 
-<p>Tumblr has ben ok. But I&rsquo;ve found that, I don&rsquo;t like any blogging platform where I have to link
-to an external page to get source code included in the blog post (lame/too much effort). The
-obvious choice to correct this was to use something based on Markdown so I can write code
-inline. And that inevitably led me to using Github Pages.</p>
+<p>This release has been a long time coming, and offers some significant improvements over the 1.1.0 release. Additionally, many people have been relying on the 2.0.0-SNAPSHOT release and this locks-in a stable version that is now available in Maven Central and the Grails Central repositories.</p>
 
-<p>That&rsquo;s all well and good, but Github Pages doesn&rsquo;t provided any type of default scheming, you
-are responsible for everything. That&rsquo;s cool if you&rsquo;re into that kind of stuff, but CSS and
-skinning has never been a strong suite of mine. So, I needed something with some generic, yet
-good looking templates. In comes Octopress.</p>
 
-<p>I&rsquo;m just starting to learn the ropes here, so I&rsquo;ll be doing a lot to play with this platform
-before finally switching the DNS record over, but so far I&rsquo;m happy.</p>
+<p><strong>ChangeLog</strong></p>
 
-<p>More to come!</p>
+
+<ul>
+<li>Automatic configuration of Grails repositories using &#8216;grails.central()&#8217; in your &#8216;repositories&#8217; block</li>
+<li>Automatic configuration of Grails, Groovy, and Spring Loaded versions</li>
+<li>Implementation of a build task structure more similar to a standard Java project (i.e. clean, build, assemble, test, check ,etc.)</li>
+<li>Better integration with IntelliJ IDEA (plugin source is now available)</li>
+<li>Definition of Grails source sets to allow for task input/output configuration</li>
+<li>Various bug fixes and improvements in Grails command spawning.</li>
+</ul>
+
+
+<p>Additional information can be found on the plugin&#8217;s Github <a href="https://github.com/grails/grails-gradle-plugin">page</a>.</p>
+
 </div>
 
 
@@ -133,21 +131,15 @@ before finally switching the DNS record over, but so far I&rsquo;m happy.</p>
   
 
 
-<time datetime="2014-02-05T09:12:38-06:00" pubdate data-updated="true"></time>
+<time datetime="2014-01-27T12:09:47-06:00" pubdate data-updated="true"></time>
       
-
-<span class="categories">
-  
-    <a class='category' href='/blog/categories/blog/'>blog</a>, <a class='category' href='/blog/categories/github-pages/'>github pages</a>, <a class='category' href='/blog/categories/tumblr/'>tumblr</a>
-  
-</span>
 
 
     </p>
     
       <div class="sharing">
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://johnrengelman.github.io/blog/2014/02/05/yet-another-blog-hosting-change/" data-via="johnrengelman" data-counturl="http://johnrengelman.github.io/blog/2014/02/05/yet-another-blog-hosting-change/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://johnrengelman.github.io/blog/2014/01/27/grails-gradle-plugin-200-released/" data-via="johnrengelman" data-counturl="http://johnrengelman.github.io/blog/2014/01/27/grails-gradle-plugin-200-released/" >Tweet</a>
   
   
   
@@ -156,8 +148,10 @@ before finally switching the DNS record over, but so far I&rsquo;m happy.</p>
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2014/01/27/grails-gradle-plugin-200-released/" title="Previous Post: Grails-Gradle Plugin 2.0.0 Released">&laquo; Grails-Gradle Plugin 2.0.0 Released</a>
+        <a class="basic-alignment left" href="/blog/2013/12/20/reproducible-multi-project-gradle-builds-part-2/" title="Previous Post: Reproducible Multi-Project Gradle builds (Part 2)">&laquo; Reproducible Multi-Project Gradle builds (Part 2)</a>
       
+      
+        <a class="basic-alignment right" href="/blog/2014/02/05/yet-another-blog-hosting-change/" title="Next Post: Yet Another Blog Hosting Change">Yet Another Blog Hosting Change &raquo;</a>
       
     </p>
   </footer>

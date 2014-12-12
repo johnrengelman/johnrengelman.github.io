@@ -4,7 +4,7 @@
   <title><![CDATA[Imperceptible Thoughts]]></title>
   <link href="http://johnrengelman.github.io/atom.xml" rel="self"/>
   <link href="http://johnrengelman.github.io/"/>
-  <updated>2014-12-12T09:28:48-06:00</updated>
+  <updated>2014-12-12T09:55:07-06:00</updated>
   <id>http://johnrengelman.github.io/</id>
   <author>
     <name><![CDATA[John Engelman]]></name>
@@ -40,6 +40,469 @@ good looking templates. In comes Octopress.</p>
 before finally switching the DNS record over, but so far I&rsquo;m happy.</p>
 
 <p>More to come!</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Grails-Gradle Plugin 2.0.0 Released]]></title>
+    <link href="http://johnrengelman.github.io/blog/2014/01/27/grails-gradle-plugin-200-released/"/>
+    <updated>2014-01-27T12:09:47-06:00</updated>
+    <id>http://johnrengelman.github.io/blog/2014/01/27/grails-gradle-plugin-200-released</id>
+    <content type="html"><![CDATA[<p>I am happy to announce that the 2.0.0 release for the Grails-Gradle plugin has finally been released.</p>
+
+
+<p>This release has been a long time coming, and offers some significant improvements over the 1.1.0 release. Additionally, many people have been relying on the 2.0.0-SNAPSHOT release and this locks-in a stable version that is now available in Maven Central and the Grails Central repositories.</p>
+
+
+<p><strong>ChangeLog</strong></p>
+
+
+<ul>
+<li>Automatic configuration of Grails repositories using &#8216;grails.central()&#8217; in your &#8216;repositories&#8217; block</li>
+<li>Automatic configuration of Grails, Groovy, and Spring Loaded versions</li>
+<li>Implementation of a build task structure more similar to a standard Java project (i.e. clean, build, assemble, test, check ,etc.)</li>
+<li>Better integration with IntelliJ IDEA (plugin source is now available)</li>
+<li>Definition of Grails source sets to allow for task input/output configuration</li>
+<li>Various bug fixes and improvements in Grails command spawning.</li>
+</ul>
+
+
+<p>Additional information can be found on the plugin&#8217;s Github <a href="https://github.com/grails/grails-gradle-plugin">page</a>.</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Reproducible Multi-Project Gradle builds (Part 2)]]></title>
+    <link href="http://johnrengelman.github.io/blog/2013/12/20/reproducible-multi-project-gradle-builds-part-2/"/>
+    <updated>2013-12-20T10:02:15-06:00</updated>
+    <id>http://johnrengelman.github.io/blog/2013/12/20/reproducible-multi-project-gradle-builds-part-2</id>
+    <content type="html"><![CDATA[<p>Follow up to my previous post -&nbsp;<a href="http://imperceptiblethoughts.com/post/70296784559/reproducible-multi-project-gradle-builds"><span>Reproducible Multi-Project Gradle builds</span></a></p>
+
+
+<p><span>I got around to doing some testing on this using a simple Gradle project. Very quickly did I find out that this particular strategy was not going to be easy&#8230;.and potentially impossible.</span></p>
+
+
+<p><strong>Problem 1 - Setting Timestamp value on Jar Entry&#8217;s</strong></p>
+
+
+<p>The first problem I ran into was actually setting the timestamp value of a Jar Entry. My first attempt looked something like this:</p>
+
+
+<p><a class="gist" href="https://gist.github.com/johnrengelman/8055368.js?file=build-1a.gradle">Build-1a.gradle</a></p>
+
+
+<p>Yup. That didn&#8217;t work. Jar&#8217;s are more or less read-only. So in order to change the time stamp, I needed to write out a new Jar file with the modified entries. Basically, create a new jar file, iterate over the entries from the first jar file, clone them, modified the time stamp, add the cloned entry to the new jar file and then binary copy the data from the first jar file to the second. It looks something like this:</p>
+
+
+<p><a class="gist" href="https://gist.github.com/johnrengelman/8055368.js?file=build-1b.gradle">Build-1b.gradle</a></p>
+
+
+<p><strong>Problem 2 - JAR &#8220;Magic&#8221; Extra Byte</strong></p>
+
+
+<p>The next issue I encountered was that my new Jar file always had an entry that didn&#8217;t match the original Jar for it&#8217;s &#8216;extra&#8217; property. JarEntry.geExtra() returns a byte[]. In the orignal file, this was null, but in my copied file it was set to some data. I finally found that it is from the implementation of <a href="http://grepcode.com/file/repository.grepcode.com/java/root/jdk/openjdk/7-b147/java/util/jar/JarOutputStream.java">JarOutputStream</a> in Java.</p>
+
+
+<p>This Jar MAGIC byte gets added to the first entry in the Jar file. I haven&#8217;t been able to find any documentation on what it is for, but a friend thought it was likely for the Jar tool itself to determine if an archive file is actually a Jar.</p>
+
+
+<p>Curiously, Jar files produced by the Gradle Jar task, do NOT have this magic byte. Digging into their code, I found that they use a ZipOutputStream to write out the Jar file which doesn&#8217;t have this magic byte code. Using ZipOutputStream and ZipEntry works just as fine and avoids this, so we update the build to do the same:</p>
+
+
+<p><a class="gist" href="https://gist.github.com/johnrengelman/8055368.js?file=build-2.gradle">Build-2.gradle</a></p>
+
+
+<p><strong>Problem 3 - Zip timestamp spec</strong></p>
+
+
+<p>After all this, I still wasn&#8217;t getting subsequent builds of the Jar to have matching checksums. I wrote a method that at the end of producing the timestamp adjusted Jar iterated over all the entries and compared all the fields to the original except the time field which I compared to the expected time stamp. Looks like this:</p>
+
+
+<p><a class="gist" href="https://gist.github.com/johnrengelman/8055368.js?file=build-3a.gradle">Build-3a.gradle</a></p>
+
+
+<p>This showed me that some entries still didn&#8217;t have the same timestamp. Curiously, they were always off by 1 second (1000 milliseconds in the script). Digging back into the Java source code for <a href="http://grepcode.com/file/repository.grepcode.com/java/root/jdk/openjdk/7-b147/java/util/zip/ZipEntry.java#ZipEntry.setTime%28long%29">ZipEntry</a>, I found it was doing some sort of unix - DOS conversion and was losing the resolution of the time.</p>
+
+
+<p>After a call out to the Twitterverse, a friend pointed out that the <a href="http://ant.apache.org/manual/Tasks/zip.html">Zip Spec</a> specifies that Zip entries have a time resolution of 2 seconds:</p>
+
+
+<blockquote>
+<p><span>The&nbsp;</span><code>update</code><span>&nbsp;parameter controls what happens if the ZIP file already exists. When set to&nbsp;</span><code>yes</code><span>, the ZIP file is updated with the files specified. (New files are added; old files are replaced with the new versions.) When set to&nbsp;</span><code>no</code><span>&nbsp;(the default) the ZIP file is overwritten if any of the files that would be added to the archive are newer than the entries inside the archive. Please note that ZIP files store file modification times with a granularity of two seconds. If a file is less than two seconds newer than the entry in the archive, Apache Ant will not consider it newer.</span></p>
+</blockquote>
+
+
+<p>So, we need to mimic this same behavior when producing our new Jar. Basically, we need to convert our timestamp to a resolution of 2 seconds. It looks like this:</p>
+
+
+<p><a class="gist" href="https://gist.github.com/johnrengelman/8055368.js?file=build-3b.gradle">Build-3b.gradle</a></p>
+
+
+<p><strong>Problem 4 - Groovy _timestamp static field</strong></p>
+
+
+<p>This got my Jars closer, but they still weren&#8217;t checksumming the same. At this point, I started using a hex viewer to compare the two files. I used <a href="http://ridiculousfish.com/hexfiend/">Hex Fiend</a>&nbsp;because it can do a side by side diff of files and is free.&nbsp;</p>
+
+
+<p>Using a Hex viewer on a Jar file doesn&#8217;t do much since the data is compressed, but it can get you pointed in the right direction. In my cause I could see some byte differences around what appeared to be some class declarations</p>
+
+
+<p><img alt="image" src="https://31.media.tumblr.com/2fc2021f78566cce91727188d905e78c/tumblr_inline_my43h20E3u1rid3vx.png" /></p>
+
+
+<p></p>
+
+
+<p>Next step was to explode the Jars and compare each of the files. This should a pretty apparent difference</p>
+
+
+<p><img alt="image" src="https://31.media.tumblr.com/bac60decc770e66835f1cc2e70e43d7d/tumblr_inline_my43jc5nNP1rid3vx.png" /></p>
+
+
+<p></p>
+
+
+<p>There was a binary difference in the class file produced by subsequent compilations. The difference was related to a filed named &#8220;__timestamp_239_neverHappen1387492963633&#8221;.&nbsp;</p>
+
+
+<p>That&#8217;s an interesting field, because there&#8217;s nothing like that in my source file:</p>
+
+
+<p><a class="gist" href="https://gist.github.com/johnrengelman/8055368.js?file=EchoApp.groovy">EchoApp.groovy</a></p>
+
+
+<p>Opening the .class file with a Java Decompiler (JD-GUI in this case), we see this for the class:</p>
+
+
+<p><a class="gist" href="https://gist.github.com/johnrengelman/8055368.js?file=EchoApp.class">EchoApp.class</a></p>
+
+
+<p>There is in fact a private variable being initialized. Opening the other copy of this class revealed that the name of this variable was changing:</p>
+
+
+<blockquote>
+<p>__timeStamp__239_neverHappen1387493347537 = l1;</p>
+<p>vs.</p>
+<p>__timeStamp__239_neverHappen1387492963633 = l1;</p>
+</blockquote>
+
+
+<p>Hmmm. That&#8217;s odd. A little more digging lead me to this <a href="https://jira.codehaus.org/browse/GROOVY-6308" title="Groovy-6308: Timestamps in bytecode prevents baselining of code">Groovy-6308</a>. The title of this bug is &#8220;Timestamps in bytecode prevents baselining of code&#8221;. Yup, this seems to be my problem.</p>
+
+
+<p>It appears this field is injected as some sort of addition to SerialVersionUUID, though the corresponding conversations of that bug and the related bugs seems to indicate that it&#8217;s not really used for anything.</p>
+
+
+<p>Unfortunately, the bugs are listed as being targeted for Groovy 3.0 which doesn&#8217;t help me in the near term.</p>
+
+
+<p>At this point, since it&#8217;s a compiler function that&#8217;s stopping me, I&#8217;m not sure I have a path forward. This will probably get back burnered for a while since it&#8217;s not critical and more of a thought experiment than anything.</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Reproducible Multi-Project Gradle builds]]></title>
+    <link href="http://johnrengelman.github.io/blog/2013/12/17/reproducible-multi-project-gradle-builds/"/>
+    <updated>2013-12-17T10:06:46-06:00</updated>
+    <id>http://johnrengelman.github.io/blog/2013/12/17/reproducible-multi-project-gradle-builds</id>
+    <content type="html"><![CDATA[<p>Lately I&#8217;ve been working on a way to create a reproducible build of my application source using Gradle. And by reproducible, I mean, when I run the md5 or sha256 checksum on the resulting files, I get the same results.</p>
+
+
+<p>This is a bit more complicate then I originally thought. The issue is that inherently, a Java Jar file includes the timestamp information for the files contained within. So, if you build a Jar and checksum it and then clean and rebuilt the Jar, even though the files are semantically identical, the resulting checksum&#8217;s will be different.</p>
+
+
+<p>This is a problem in Continuous Integration/Deployment environments where you may be building from a clean VCS checkout every time but want to know only about the things that changed.</p>
+
+
+<p>Working around this in Gradle is a bit of mind twister. After thinking about this for a couple days, I&#8217;ve come up with this list of items that need to addressed to successfully accomplish what I&#8217;m trying to do.</p>
+
+
+<ol>
+<li><span>Calculate a single timestamp for each artifact that Gradle produces</span></li>
+<li><span>Timestamp calculation needs to be sensitive to the Gradle project that produces the artifact.</span></li>
+<li><span>Timestamp calculation needs to be sensitive to any Gradle project dependencies for the project producing the artifact.</span></li>
+<li><span>Modify the resulting artifact to set the timestamp information for contents&nbsp;</span>uniformly<span>.&nbsp;</span></li>
+</ol>
+
+
+<p><span>After a quick Twitter conversation with Luke Daley, item 4 was knocked out by using Java&#8217;s ZipFile API to iterate over the jar&#8217;s contents and set the lastModified timestamp to a value, but that leaves the more critical timestamp calculations.</span></p>
+
+
+<p>Let&#8217;s start with a mind experiment to figure out what we need. Let&#8217;s assume we have the following Gradle project structure:</p>
+
+
+<blockquote>
+<p>myApp</p>
+<p>&nbsp; | - utils</p>
+<p>&nbsp; | - app</p>
+</blockquote>
+
+
+<p>This is a simple Gradle multi-project build where we have the application as one project and a utility library as another.</p>
+
+
+<p>We check this code out and run a &#8216;./gradlew build&#8217; and calculate an MD5 checksum on utils.jar and app.jar:</p>
+
+
+<blockquote>
+<p><span>File &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Checksum</span></p>
+<p>utils.jar &nbsp; | &nbsp; A</p>
+<p>app.jar &nbsp; | &nbsp; B&nbsp;</p>
+</blockquote>
+
+
+<p>If I make a change to the app project and do a &#8216;./gradlew clean build&#8217;, we want the following to happen:</p>
+
+
+<blockquote>
+<p><span>File &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Checksum</span></p>
+<p>utils.jar &nbsp; | &nbsp; A</p>
+<p>app.jar &nbsp; | &nbsp; B&#8217;&nbsp;</p>
+</blockquote>
+
+
+<p>In this scenario, only the app.jar checksum would change because the utils project is functionally equivalent.</p>
+
+
+<p>However, if we start from our initial commit and change the utils project and do a &#8216;./gradlew clean build&#8217;, we want the following to happen:</p>
+
+
+<blockquote>
+<p><span>File &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Checksum</span></p>
+<p>utils.jar &nbsp; | &nbsp; A&#8217;</p>
+<p>app.jar &nbsp; | &nbsp; B&#8217;</p>
+</blockquote>
+
+
+<p>&nbsp;In this case with only a change to utils, we want both checksums to change because the app project is dependent upon the changed code in the utils library.</p>
+
+
+<p>My initial thought was to use my VCS to get a timestamp for the latest change to the Gradle project being built. This would couple my build to the VCS being used, but that&#8217;s an okay dependency in my opinion. Alternatively, the build could scan over the source contents and get the latest lastModified timestamp of any file contained within. &nbsp; &nbsp;</p>
+
+
+<p>Neither of these solutions would solve the issue with upstream libraries however. Somehow, we need to propagate the upstream project&#8217;s information.</p>
+
+
+<p>I&#8217;m not sure there is a &#8220;nice&#8221; way to do this, but my current thinking is to simulate this meta information by enforcing a commit to downstream projects when an upstream is modified. In my particular case, I would likely change the project&#8217;s version of the upstream library by modifying the &#8216;build.gradle&#8217; file in that project. I could add a task that verify&#8217;s that the downstream project has a version that is &#8220;at least&#8221; equivalent to any upstream project&#8217;s versions. This could run as part of the standard build process. This would force a change to the downstream&#8217;s build.gradle thus indirectly updating the timestamp the VCS would report for that project.</p>
+
+
+<p>All of this is theoretical at this point, I&#8217;ve only started working on an implementation. I&#8217;ll update this post as I learn more.</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Change of heart....]]></title>
+    <link href="http://johnrengelman.github.io/blog/2013/10/08/change-of-heart/"/>
+    <updated>2013-10-08T13:54:00-05:00</updated>
+    <id>http://johnrengelman.github.io/blog/2013/10/08/change-of-heart</id>
+    <content type="html"><![CDATA[<p>As I was adding a new post today, I noticed an old post of mine that I had migrated from my old blog to this one about using IntelliJ and comparing it with STS. It&#8217;s a little over 2 years old and in it I make the statement &#8220;STS which is based on Eclipse, which I consider to be the premier Java IDE&#8221;.</p>
+
+
+<p>At the time, I was just starting my new job after 7 years with a large company where I primarily used Eclipse as my development tool on vanilla Java projects. And though I did really Eclipse at the time and was frustrated for quite a while with IntelliJ&#8217;s performance, I have to clarify that it&#8217;s is not my stance anymore.</p>
+
+
+<p>Here&#8217;s the thing, I haven&#8217;t used Eclipse or STS for more than ~3mins in the last 2 1/2 years, so I cannot personally attest to its performance or usability. However, in the last 2 1/2 years, IntelliJ (I started with version 9 and am now using the 13 EAP) has come a long way. it&#8217;s performance is dramatically better. I&#8217;m faster using it now and I love the improvements with respect to Gradle integration they&#8217;ve been bringing in.</p>
+
+
+<p>I&#8217;m not going to promote one over the other like I said because I don&#8217;t have enough usage of Eclipse recently to make a comparison and don&#8217;t really have the time or desire to look at it any time soon. So I&#8217;ll just leave it at that.</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Creating self-contained, executable jars with Gradle and Shadow]]></title>
+    <link href="http://johnrengelman.github.io/blog/2013/10/08/creating-self-contained-executable-jars-with-gradle-and-shadow/"/>
+    <updated>2013-10-08T13:43:54-05:00</updated>
+    <id>http://johnrengelman.github.io/blog/2013/10/08/creating-self-contained-executable-jars-with-gradle-and-shadow</id>
+    <content type="html"><![CDATA[<p>I originally posted this over on <a href="http://www.objectpartners.com/">objectpartners.com</a>&nbsp;(2013/07/16)</p>
+
+
+<p>Deploying Java applications that are not hosted in an application container (such as a WAR or EAR) can be a pain due to classpath dependencies. This is especially true when using a micro-service framework such as Dropwizard. Using Gradle and the Shadow plugin, applications can be packaged up into a single jar and distributed to your production environments with one file.</p>
+
+
+<p>Head over to <a href="http://www.objectpartners.com/2013/07/16/creating-self-contained-executable-jars-with-gradle-and-shadow/">objectpartners.com</a>&nbsp;to read more and see examples.</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Profiling Grails Applications With VisualVM]]></title>
+    <link href="http://johnrengelman.github.io/blog/2013/03/25/profiling-grails-applications-with-visualvm/"/>
+    <updated>2013-03-25T08:55:00-05:00</updated>
+    <id>http://johnrengelman.github.io/blog/2013/03/25/profiling-grails-applications-with-visualvm</id>
+    <content type="html"><![CDATA[<p>I originally posted this over on <a href="http://www.objectpartners.com/">objectpartners.com</a>&nbsp;(2013/01/25)</p>
+
+
+<p>Profiling Grails applications can be a real pain due to many reasons: large heap and perm-gen requirements due to Groovy, class reloading, overhead of Grails itself.&nbsp;</p>
+
+
+<p>Read on over at <a href="http://www.objectpartners.com/">objectpartners.com</a> for tips and tricks on profiling Grails applications with Oracle&#8217;s VisualVM:</p>
+
+
+<p><a href="http://www.objectpartners.com/2013/01/25/profiling-grails-applications-with-visualvm/">Profiling Grails Applications With VisualVM</a></p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Recovering from Merge Errors in Mercurial with Sub-Repositories and Named Branches]]></title>
+    <link href="http://johnrengelman.github.io/blog/2013/03/25/recovering-from-merge-errors-in-mercurial-with-sub-repositories-and-named-branches/"/>
+    <updated>2013-03-25T08:51:00-05:00</updated>
+    <id>http://johnrengelman.github.io/blog/2013/03/25/recovering-from-merge-errors-in-mercurial-with-sub-repositories-and-named-branches</id>
+    <content type="html"><![CDATA[<p>I originally posted this post over on <a href="objectpartners.com">objectpartners.com</a>&nbsp;(2013/03/08)</p>
+
+
+<p>This client used Mercurial and sub repositories (though they&#8217;ve finally changed to Git and Artifactory) to manage their code base and this caused some issues every so often with a team of 20 developers. Read on over there for more detals.</p>
+
+
+<p><a href="http://www.objectpartners.com/2012/03/08/recovering-from-merge-errors-in-mercurial-with-sub-repositories-and-named-branches/">Recovering from Merge Errors in Mercurial with Sub-Repositories and Named Branches</a></p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[New Blog. Hooray!]]></title>
+    <link href="http://johnrengelman.github.io/blog/2013/03/25/new-blog-hooray/"/>
+    <updated>2013-03-25T08:32:00-05:00</updated>
+    <id>http://johnrengelman.github.io/blog/2013/03/25/new-blog-hooray</id>
+    <content type="html"><![CDATA[<p>So I&#8217;ve decided to switch my blog over from a Wordpress sited hosted on a server in my basement to Tumblr. I don&#8217;t blog that much, but I want to do more and I don&#8217;t really want the responsibility of maintaining the server. Also, I want to keep my technical posts and my more mundane posts separate.</p>
+
+
+<p>I&#8217;m going to republish some old posts of mine to this blog. I&#8217;m also going to republish some blog posts from my <a href="http://www.objectpartners.com/">Object Partners</a> blog here as well.</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Contributing to Grails-Core with IntelliJ IDEA 11]]></title>
+    <link href="http://johnrengelman.github.io/blog/2012/01/16/contributing-to-grails-core-with-intellij-idea-11/"/>
+    <updated>2012-01-16T08:45:00-06:00</updated>
+    <id>http://johnrengelman.github.io/blog/2012/01/16/contributing-to-grails-core-with-intellij-idea-11</id>
+    <content type="html"><![CDATA[<p>I&#8217;ve recently started to work on contributing patches to the Grails Framework project. I&#8217;ve been lucky enough to be working for a client that is ok with using the latest versions of Grails for its back-end applications, so I&#8217;ve been able to play around a lot with Grails 2.0.0 since it&#8217;s release at the end of last year. However, this has resulted in me encountering a number of unexpected/irritating bugs that have sometimes prevented code from being migrated &#8220;as-is&#8221;. So, I&#8217;ve decided to try and learn and contribute back by working on some bugs myself.</p>
+
+
+<p>If you&#8217;re looking to contribute yourself, start here:&nbsp;<a href="http://grails.org/Contribute">http://grails.org/Contribute</a>. I didn&#8217;t have any issues getting up and running with my own fork of grails-core. I did have to execute a &#8220;./gradlew compile&#8221; task though before I was able to get any test to execute&#8230;and don&#8217;t worry, when this takes a while. There are&nbsp;<strong>A LOT</strong>&nbsp;of dependencies to download.</p>
+
+
+<p>My next step was to start using IntelliJ 11 since it would allow me to quickly debug failing tests, so I again returned to the grails.org website and found the executing the &#8220;./gradlew idea&#8221; task will produce the necessary IntelliJ project files&#8230;Excellent. But this is where the problems started.</p>
+
+
+<p>First, I had to open the Module Settings for<span>&nbsp;grails-script</span>&nbsp;and remove the entry under &#8216;Source Folders&#8217;. This was causing IntelliJ to not save any edits I made to the module properties. It appears that this entry isn&#8217;t needed anyway (and I haven&#8217;t run into any issues with it yet).</p>
+
+
+<p>Second, the project wouldn&#8217;t compile because the following 2 classes couldn&#8217;t be found:&nbsp;<em>com.springsource.loaded.ReloadEventProcessorPlugin</em>and&nbsp;<em>com.springsource.loaded.Plugins</em>. After some searching, I found the&nbsp;<span>springloaded-core-1.0.2.jar</span>&nbsp;in my Gradle User Home (~/.gradle) directory (look under ~/.gradle/caches/artifacts-7, it maybe be something different then artifact-7). I copied this jar to my home directory, opened the Module Settings for grails-core-grails-core and added a Jar Dependency that pointed to the springloaded-core-1.0.2.jar in my home directory.</p>
+
+
+<p>Third, the grails-plugin-validation module won&#8217;t compile because it was missing a dependency to the grails-web module. Again, I opened the Module Settings for grails-plugin-validation and added a Module Dependency to grails-web.</p>
+
+
+<p>Now, I can finally run and debug my tests and get working on some patches.</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[Updated] Eclipse STS vs IntelliJ IDEA for Grails Development]]></title>
+    <link href="http://johnrengelman.github.io/blog/2011/04/20/updated-eclipse-sts-vs-intellij-idea-for-grails-development/"/>
+    <updated>2011-04-20T08:43:00-05:00</updated>
+    <id>http://johnrengelman.github.io/blog/2011/04/20/updated-eclipse-sts-vs-intellij-idea-for-grails-development</id>
+    <content type="html"><![CDATA[<p>So, I have become increasingly frustrated with IntelliJ for doing Grails development. I know. Everyone swears by it being &#8220;THE&#8221; IDE for Grails work, but I just can&#8217;t get on that boat. Not only do I find the UI a total cluster-fuck and it nearly impossible to find the information that I want on the screen when I want it, but it is also a serious resource hog.<img alt="" class="mceWPmore" src="http://johnrengelman.com/wp-includes/js/tinymce/plugins/wordpress/img/trans.gif" title="More..." /></p>
+
+
+<p>I have a brand new Sandy Bridge, Quad-Core Macbook Pro with 4 GB of RAM and I&#8217;m constantly fighting with IntelliJ when it&#8217;s doing something. This is my machine on any given day: iTunes, Twitter Client, Skype Client, Chrome (w/ 4 open tabs), Firefox (maybe), and IntelliJ&#8230;that&#8217;s it. That&#8217;s all I have running. There are a couple background apps (Dropbox, TunnelBlick SSH) but that&#8217;s really all that I have running&#8230;yet I still have to constantly wait for IntelliJ to do things&#8230;I get the stupid beach ball, wait-while-I-inexplicably-tie-up-4-core-and-4-GB-of-RAM-for-no-damn-reason icon. UGH. So frustrating. Not to mention, IntelliJ&#8217;s inability to perform the simplest in task in Subversion without you having to walk away for 10 mins while it does it.</p>
+
+
+<p>So I&#8217;ve decided on a little experiment. SpringSource recently released version 2.6.0-SR1 of their STS tool set. STS is build on top of the Eclipse&#8230;what I consider the premiere Java IDE. So I&#8217;m installing. And I&#8217;m going to see if I can get some work done in STS for the rest of the week. And next week, I&#8217;ll come back to this post with some thoughts and a final decision on what I&#8217;m going to use.</p>
+
+
+<p><strong>Initial Impressions</strong></p>
+
+
+<p>I installed STS without any problems on my machine, but quickly found that I needed some items to get up and running. Surprise, surprise. First, you need to install/activate the Grails support for STS. This is done from the STS Dashboard when the application first starts up. &nbsp;I should have remembered this since a co-worker wrote an article about STS/Grails not to long ago:&nbsp;<a href="http://www.objectpartners.com/2011/02/15/start-using-eclipse-with-grails-support-via-sts/">Start Using Eclipse with Grails Support via STS</a>.</p>
+
+
+<p>Done. Next step, get my project from SVN. Fail. Apparently STS doesn&#8217;t ship with Subclipse installed by default. Really not that big of a surprise, since Eclipse doesn&#8217;t either. Just another annoyance.</p>
+
+
+<p><strong>Development</strong></p>
+
+
+<p>After finally getting my project checked out and configuring some additional source folders so Eclipse could find all the Groovy classes, I got up a running. Yet there was one nagging issue I couldn&#8217;t seem to resolve. Apparently STS applies Java Code checks to Groovy files. In most cases this is valid, since Groovy is built on top of Java. However, STS kept finding one error that really annoyed me (disclaimer: I know the following code example is actually bad code. It&#8217;s not mine. I also know how to fix it, but I&#8217;m not going to since it&#8217;s production code. Plus, it&#8217;s valid in Groovy for whatever reason).</p>
+
+
+<p><em>The Problem</em></p>
+
+
+<p>STS kept finding a &#8220;cannot reduce inherited method visibility error&#8221; on some Groovy classes. Here is the example code.</p>
+
+
+<pre>abstract class Foo {
+   <span>public</span> abstract def bar();
+}
+
+class FooImpl {
+   @Overrides
+   protected def bar() {
+      return "Hello World!"
+   }
+}</pre>
+
+
+<p>Now, in Java, this would be an error since the&nbsp;a method defined without a visibility level would default to&nbsp;as&nbsp;&#8220;package&#8221;&nbsp;&#8220;public&#8221;. So&nbsp;<em>abstract&nbsp;<span>public</span>&nbsp;def bar()</em>would be&nbsp;<span>package</span>&nbsp;<span>public</span>&nbsp;visibility. However, the implementation class, reduces the visibility to&nbsp;<span>protected</span>&nbsp;which breaks the inheritance structure, since anythingin the same package&nbsp;should be able to call&nbsp;<em>Foo.bar()</em>&nbsp;and now we&#8217;ve limited access to only classes that extends&nbsp;<em>FooImpl</em>.</p>
+
+
+<p>However, in Groovy, this is slightly different. The same problem still arises, since the default for Groovy methods are&nbsp;<span>public</span>&nbsp;and we are reducing visibility to<span>protected</span>. However, the above code, compiles, and runs under Groovy/Grails just fine.</p>
+
+
+<p><em>The Solution</em></p>
+
+
+<p>I know the correct solution is to define&nbsp;<em>Foo.bar()</em>&nbsp;as being&nbsp;<span>protected</span>. Or remove the&nbsp;<span>protected</span>&nbsp;from&nbsp;<em>FooImpl.bar()</em>. But I wonder why, STS picks this up and IntelliJ does not. Especially since it is not a compilation error in Groovy.</p>
+
+
+<p><em>End Game</em></p>
+
+
+<p>It appears that STS still has some work to do with Groovy syntax support. Or maybe some way to adjust which Java Checks are applied to .groovy files. I&#8217;m still playing, but in the meantime, I&#8217;ve upgraded my machine to 8GB of RAM and IntelliJ is performing much better&#8230;crazy, that I need 8GB to get good performance, but oh well.</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[IntelliJ 10 Tuning]]></title>
+    <link href="http://johnrengelman.github.io/blog/2011/04/01/intellij-10-tuning/"/>
+    <updated>2011-04-01T08:42:00-05:00</updated>
+    <id>http://johnrengelman.github.io/blog/2011/04/01/intellij-10-tuning</id>
+    <content type="html"><![CDATA[<p>I&#8217;ve recently switched over to using IntelliJ IDEA for doing Groovy/Grails development. It&#8217;s been a couple weeks and after 6 years of using Eclipse, I&#8217;m still feeling the pain a bit.</p>
+
+
+<p>On top of a new IDE, I&#8217;m now developing primarily on my new MacBook Pro. So that&#8217;s adding to the transition. My biggest problem has been the slowness of IntelliJ. It randomly just locks up for a few minutes before continuing on.&nbsp;<img alt="" class="mceWPmore" src="http://johnrengelman.com/wp-includes/js/tinymce/plugins/wordpress/img/trans.gif" title="More..." />So, I did what any normal software developer would do: I turned to Google for the answer. I very quickly found this little page: &nbsp;<a href="http://blog.amber.org/2010/12/intellij-idea-10-performance-on-mac-os-x/">IntelliJ IDEA 10 performace on Mac</a>. Thanks to&nbsp;<a href="http://blog.amber.org/about/">Chris</a>&nbsp;and a couple other random postings (one key info was to turn off the vast selection of IDEA plugins that are enabled by default and aren&#8217;t used), I got my system running much, much, much faster.</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[GoDaddy DNS & Wordpress Multisite]]></title>
+    <link href="http://johnrengelman.github.io/blog/2011/03/07/godaddy-dns-wordpress-multisite/"/>
+    <updated>2011-03-07T08:40:00-06:00</updated>
+    <id>http://johnrengelman.github.io/blog/2011/03/07/godaddy-dns-wordpress-multisite</id>
+    <content type="html"><![CDATA[<p>Tonight, I decided to setup a multisite configuration for my Wordpress installation (which you are reading right now). My sister is involved in marketing and advertising and wanted to start her own blog. I figured this was a good opportunity to play with the server some more.</p>
+
+
+<p><img alt="" class="mceWPmore" src="http://johnrengelman.com/wp-includes/js/tinymce/plugins/wordpress/img/trans.gif" title="More..." />I decided to use the Subdomain configuration and the instructions found&nbsp;<a href="http://codex.wordpress.org/Create_A_Network">here</a>. Only, initially, I didn&#8217;t want to apply a blanket *.johnrengelman.com DNS redirect. I don&#8217;t know why I didn&#8217;t want to do this. It was an arbitrary decision on my part. An arbitrary decision that ended up costing me about 2 hours tonight :(</p>
+
+
+<p>Somehow, as I was configuring the DNS entries (using GoDaddy&#8217;s DNS Manager), I messed up something. After completing the installation in Wordpress, I couldn&#8217;t reach my sister&#8217;s&nbsp;<a href="http://amanda.johnrengelman.com/">site</a>. I could open any other sub-domain which would redirect to my homepage.</p>
+
+
+<p>After backtracking and restoring backups and reinstalling, I still couldn&#8217;t open the site. The confusing part is that&nbsp;<em>nslookup</em>&nbsp;resolved the address correctly, but&nbsp;<em>ping</em>couldn&#8217;t reach my server. :-/ Very confusing.</p>
+
+
+<p>It appears that some entry I placed into the DNS records propagated out and wasn&#8217;t immediately updated when I entered new settings. I decided to give up for a few minutes and when I came back, everything was working. Ugh. Server work is very frustrating at times.</p>
+
 ]]></content>
   </entry>
   

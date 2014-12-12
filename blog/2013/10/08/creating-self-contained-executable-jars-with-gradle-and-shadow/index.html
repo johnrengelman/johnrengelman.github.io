@@ -5,12 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Yet Another Blog Hosting Change - Imperceptible Thoughts</title>
+  <title>Creating self-contained, executable jars with Gradle and Shadow - Imperceptible Thoughts</title>
   <meta name="author" content="John Engelman">
 
   
-  <meta name="description" content="Only a few months ago, I decided to switch my personal blog (which isn&rsquo;t maintained very well)
-from a privately hosted Wordpress installation &hellip;">
+  <meta name="description" content="I originally posted this over on objectpartners.com&nbsp;(2013/07/16) Deploying Java applications that are not hosted in an application container ( &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -19,7 +18,7 @@ from a privately hosted Wordpress installation &hellip;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://johnrengelman.github.io/blog/2014/02/05/yet-another-blog-hosting-change/">
+  <link rel="canonical" href="http://johnrengelman.github.io/blog/2013/10/08/creating-self-contained-executable-jars-with-gradle-and-shadow/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/javascripts/modernizr-2.0.js"></script>
@@ -66,7 +65,7 @@ from a privately hosted Wordpress installation &hellip;">
   
   <header>
     
-      <h1 class="entry-title">Yet Another Blog Hosting Change</h1>
+      <h1 class="entry-title">Creating Self-contained, Executable Jars With Gradle and Shadow</h1>
     
     
       <p class="meta">
@@ -82,35 +81,21 @@ from a privately hosted Wordpress installation &hellip;">
   
 
 
-<time datetime="2014-02-05T09:12:38-06:00" pubdate data-updated="true"></time>
+<time datetime="2013-10-08T13:43:54-05:00" pubdate data-updated="true"></time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><p>Only a few months ago, I decided to switch my personal blog (which isn&rsquo;t maintained very well)
-from a privately hosted Wordpress installation on a server in my basement to Tumblr. There
-were a lot of reasons for this but the biggest was, I&rsquo;m not very interested in maintaining that
-server anymore.</p>
-
-<!-- more -->
+<div class="entry-content"><p>I originally posted this over on <a href="http://www.objectpartners.com/">objectpartners.com</a>&nbsp;(2013/07/16)</p>
 
 
-<p>Tumblr has ben ok. But I&rsquo;ve found that, I don&rsquo;t like any blogging platform where I have to link
-to an external page to get source code included in the blog post (lame/too much effort). The
-obvious choice to correct this was to use something based on Markdown so I can write code
-inline. And that inevitably led me to using Github Pages.</p>
+<p>Deploying Java applications that are not hosted in an application container (such as a WAR or EAR) can be a pain due to classpath dependencies. This is especially true when using a micro-service framework such as Dropwizard. Using Gradle and the Shadow plugin, applications can be packaged up into a single jar and distributed to your production environments with one file.</p>
 
-<p>That&rsquo;s all well and good, but Github Pages doesn&rsquo;t provided any type of default scheming, you
-are responsible for everything. That&rsquo;s cool if you&rsquo;re into that kind of stuff, but CSS and
-skinning has never been a strong suite of mine. So, I needed something with some generic, yet
-good looking templates. In comes Octopress.</p>
 
-<p>I&rsquo;m just starting to learn the ropes here, so I&rsquo;ll be doing a lot to play with this platform
-before finally switching the DNS record over, but so far I&rsquo;m happy.</p>
+<p>Head over to <a href="http://www.objectpartners.com/2013/07/16/creating-self-contained-executable-jars-with-gradle-and-shadow/">objectpartners.com</a>&nbsp;to read more and see examples.</p>
 
-<p>More to come!</p>
 </div>
 
 
@@ -133,21 +118,15 @@ before finally switching the DNS record over, but so far I&rsquo;m happy.</p>
   
 
 
-<time datetime="2014-02-05T09:12:38-06:00" pubdate data-updated="true"></time>
+<time datetime="2013-10-08T13:43:54-05:00" pubdate data-updated="true"></time>
       
-
-<span class="categories">
-  
-    <a class='category' href='/blog/categories/blog/'>blog</a>, <a class='category' href='/blog/categories/github-pages/'>github pages</a>, <a class='category' href='/blog/categories/tumblr/'>tumblr</a>
-  
-</span>
 
 
     </p>
     
       <div class="sharing">
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://johnrengelman.github.io/blog/2014/02/05/yet-another-blog-hosting-change/" data-via="johnrengelman" data-counturl="http://johnrengelman.github.io/blog/2014/02/05/yet-another-blog-hosting-change/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://johnrengelman.github.io/blog/2013/10/08/creating-self-contained-executable-jars-with-gradle-and-shadow/" data-via="johnrengelman" data-counturl="http://johnrengelman.github.io/blog/2013/10/08/creating-self-contained-executable-jars-with-gradle-and-shadow/" >Tweet</a>
   
   
   
@@ -156,8 +135,10 @@ before finally switching the DNS record over, but so far I&rsquo;m happy.</p>
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2014/01/27/grails-gradle-plugin-200-released/" title="Previous Post: Grails-Gradle Plugin 2.0.0 Released">&laquo; Grails-Gradle Plugin 2.0.0 Released</a>
+        <a class="basic-alignment left" href="/blog/2013/03/25/profiling-grails-applications-with-visualvm/" title="Previous Post: Profiling Grails Applications With VisualVM">&laquo; Profiling Grails Applications With VisualVM</a>
       
+      
+        <a class="basic-alignment right" href="/blog/2013/10/08/change-of-heart/" title="Next Post: Change of heart....">Change of heart&#8230;. &raquo;</a>
       
     </p>
   </footer>
