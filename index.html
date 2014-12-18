@@ -280,109 +280,12 @@ server anymore.</p>
 
 <p>This is a problem in Continuous Integration/Deployment environments where you may be building from a clean VCS checkout every time but want to know only about the things that changed.</p>
 
-<p>Working around this in Gradle is a bit of mind twister. After thinking about this for a couple days, I&rsquo;ve come up with this list of items that need to addressed to successfully accomplish what I&rsquo;m trying to do.</p>
-
-<ol>
-<li>Calculate a single timestamp for each artifact that Gradle produces</li>
-<li>Timestamp calculation needs to be sensitive to the Gradle project that produces the artifact.</li>
-<li>Timestamp calculation needs to be sensitive to any Gradle project dependencies for the project producing the artifact.</li>
-<li>Modify the resulting artifact to set the timestamp information for contents uniformly.</li>
-</ol>
-
-
-<p>After a quick Twitter conversation with <a href="http://twitter.com/ldaley">Luke Daley</a>, item 4 was knocked out by using Java&rsquo;s <code>ZipFile</code> API to iterate over the jar&rsquo;s contents and set the <code>lastModified</code> timestamp to a value, but that leaves the more critical timestamp calculations.</p>
-
-<p>Let&rsquo;s start with a mind experiment to figure out what we need. Let&rsquo;s assume we have the following Gradle project structure:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>myApp
-</span><span class='line'>  |- utils
-</span><span class='line'>  |- app</span></code></pre></td></tr></table></div></figure>
-
-
-<p>This is a simple Gradle multi-project build where we have the application as one project and a utility library as another.</p>
-
-<p>We check this code out and run a <code>./gradlew build</code> and calculate an MD5 checksum on <code>utils.jar</code> and <code>app.jar</code>:</p>
-
-<table>
-<thead>
-<tr>
-<th style="text-align:center;">   File    </th>
-<th style="text-align:center;"> Checksum </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center;"> utils.jar </td>
-<td style="text-align:center;">    A     </td>
-</tr>
-<tr>
-<td style="text-align:center;">  app.jar  </td>
-<td style="text-align:center;">    B     </td>
-</tr>
-</tbody>
-</table>
-
-
-<p>If I make a change to the <code>app</code> project and do a <code>./gradlew clean build</code>, we want the following to happen:</p>
-
-<table>
-<thead>
-<tr>
-<th style="text-align:center;">   File    </th>
-<th style="text-align:center;"> Checksum </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center;"> utils.jar </td>
-<td style="text-align:center;">    A     </td>
-</tr>
-<tr>
-<td style="text-align:center;">  app.jar  </td>
-<td style="text-align:center;">    B&#8217;    </td>
-</tr>
-</tbody>
-</table>
-
-
-<p>In this scenario, only the <code>app.jar</code> checksum would change because the <code>utils</code> project is functionally equivalent.</p>
-
-<p>However, if we start from our initial commit and change the <code>utils</code> project and do a <code>./gradlew clean build</code>, we want the following to happen:</p>
-
-<table>
-<thead>
-<tr>
-<th style="text-align:center;">   File    </th>
-<th style="text-align:center;"> Checksum </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center;"> utils.jar </td>
-<td style="text-align:center;">    A&#8217;    </td>
-</tr>
-<tr>
-<td style="text-align:center;">  app.jar  </td>
-<td style="text-align:center;">    B&#8217;    </td>
-</tr>
-</tbody>
-</table>
-
-
-<p>In this case with only a change to <code>utils</code>, we want both checksums to change because the <code>app</code> project is dependent upon the changed code in the utils library.</p>
-
-<p>My initial thought was to use my VCS to get a timestamp for the latest change to the Gradle project being built. This would couple my build to the VCS being used, but that&rsquo;s an okay dependency in my opinion. Alternatively, the build could scan over the source contents and get the latest <code>lastModified</code> timestamp of any file contained within.</p>
-
-<p>Neither of these solutions would solve the issue with upstream libraries however. Somehow, we need to propagate the upstream project&rsquo;s information.</p>
-
-<p>I&rsquo;m not sure there is a <em>nice</em> way to do this, but my current thinking is to simulate this meta information by enforcing a commit to downstream projects when an upstream is modified. In my particular case, I would likely change the project&rsquo;s version of the upstream library by modifying the <code>build.gradle</code> file in that project. I could add a task that verifies that the downstream project has a version that is <em>at least</em> equivalent to any upstream projects&#8217; versions. This could run as part of the standard build process. This would force a change to the downstream&rsquo;s <code>build.gradle</code> thus indirectly updating the timestamp the VCS would report for that project.</p>
-
-<p>All of this is theoretical at this point, I&rsquo;ve only started working on an implementation. I&rsquo;ll update this post as I learn more.</p>
 </div>
   
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/12/17/reproducible-multi-project-gradle-builds/">Read on &rarr;</a>
+    </footer>
   
 
 

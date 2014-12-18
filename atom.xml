@@ -4,7 +4,7 @@
   <title><![CDATA[Imperceptible Thoughts]]></title>
   <link href="http://johnrengelman.github.io/atom.xml" rel="self"/>
   <link href="http://johnrengelman.github.io/"/>
-  <updated>2014-12-18T15:13:48-06:00</updated>
+  <updated>2014-12-18T15:16:29-06:00</updated>
   <id>http://johnrengelman.github.io/</id>
   <author>
     <name><![CDATA[John Engelman]]></name>
@@ -436,6 +436,9 @@ public class EchoApp
 <p>This is a bit more complicate then I originally thought. The issue is that inherently, a Java Jar file includes the timestamp information for the files contained within. So, if you build a Jar and checksum it and then clean and rebuilt the Jar, even though the files are semantically identical, the resulting checksum&rsquo;s will be different.</p>
 
 <p>This is a problem in Continuous Integration/Deployment environments where you may be building from a clean VCS checkout every time but want to know only about the things that changed.</p>
+
+<!-- more -->
+
 
 <p>Working around this in Gradle is a bit of mind twister. After thinking about this for a couple days, I&rsquo;ve come up with this list of items that need to addressed to successfully accomplish what I&rsquo;m trying to do.</p>
 
