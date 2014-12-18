@@ -9,7 +9,7 @@
   <meta name="author" content="John Engelman">
 
   
-  <meta name="description" content="I've recently started to work on contributing patches to the Grails Framework project. I've been lucky enough to be working for a client that is ok &hellip;">
+  <meta name="description" content="I&rsquo;ve recently started to work on contributing patches to the Grails Framework project. I&rsquo;ve been lucky enough to be working for a client &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -30,6 +30,18 @@
 <link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
 
   
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-321220-4']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
 
 </head>
 
@@ -83,31 +95,25 @@
 
 <time datetime="2012-01-16T08:45:00-06:00" pubdate data-updated="true"></time>
         
+        
       </p>
     
   </header>
 
 
-<div class="entry-content"><p>I&#8217;ve recently started to work on contributing patches to the Grails Framework project. I&#8217;ve been lucky enough to be working for a client that is ok with using the latest versions of Grails for its back-end applications, so I&#8217;ve been able to play around a lot with Grails 2.0.0 since it&#8217;s release at the end of last year. However, this has resulted in me encountering a number of unexpected/irritating bugs that have sometimes prevented code from being migrated &#8220;as-is&#8221;. So, I&#8217;ve decided to try and learn and contribute back by working on some bugs myself.</p>
+<div class="entry-content"><p>I&rsquo;ve recently started to work on contributing patches to the Grails Framework project. I&rsquo;ve been lucky enough to be working for a client that is ok with using the latest versions of Grails for its back-end applications, so I&rsquo;ve been able to play around a lot with Grails 2.0.0 since it&rsquo;s release at the end of last year. However, this has resulted in me encountering a number of unexpected/irritating bugs that have sometimes prevented code from being migrated &ldquo;as-is&rdquo;. So, I&rsquo;ve decided to try and learn and contribute back by working on some bugs myself.</p>
 
+<p>If you&rsquo;re looking to contribute yourself, start here <a href="http://grails.org/Contribute.">http://grails.org/Contribute.</a> I didn&rsquo;t have any issues getting up and running with my own fork of grails-core. I did have to execute a <code>./gradlew compile</code> task though before I was able to get any test to execute&hellip;and don&rsquo;t worry, when this takes a while. There are <strong>A LOT</strong> of dependencies to download.</p>
 
-<p>If you&#8217;re looking to contribute yourself, start here:&nbsp;<a href="http://grails.org/Contribute">http://grails.org/Contribute</a>. I didn&#8217;t have any issues getting up and running with my own fork of grails-core. I did have to execute a &#8220;./gradlew compile&#8221; task though before I was able to get any test to execute&#8230;and don&#8217;t worry, when this takes a while. There are&nbsp;<strong>A LOT</strong>&nbsp;of dependencies to download.</p>
+<p>My next step was to start using IntelliJ 11 since it would allow me to quickly debug failing tests, so I again returned to the grails.org website and found the executing the <code>./gradlew idea</code> task will produce the necessary IntelliJ project files&hellip;Excellent. But this is where the problems started.</p>
 
+<p>First, I had to open the Module Settings for <code>grails-script</code> and remove the entry under &lsquo;Source Folders&rsquo;. This was causing IntelliJ to not save any edits I made to the module properties. It appears that this entry isn&rsquo;t needed anyway (and I haven&rsquo;t run into any issues with it yet).</p>
 
-<p>My next step was to start using IntelliJ 11 since it would allow me to quickly debug failing tests, so I again returned to the grails.org website and found the executing the &#8220;./gradlew idea&#8221; task will produce the necessary IntelliJ project files&#8230;Excellent. But this is where the problems started.</p>
+<p>Second, the project wouldn&rsquo;t compile because the following 2 classes couldn&rsquo;t be found:<code>com.springsource.loaded.ReloadEventProcessorPlugin</code> and <code>com.springsource.loaded.Plugins</code>. After some searching, I found the <code>springloaded-core-1.0.2.jar</code> in my Gradle User Home (<code>~/.gradle</code>) directory (look under <code>~/.gradle/caches/artifacts-7</code>, it maybe be something different then <code>artifact-7</code>). I copied this jar to my home directory, opened the Module Settings for <code>grails-core-grails-core</code> and added a Jar Dependency that pointed to the <code>springloaded-core-1.0.2.jar</code> in my home directory.</p>
 
-
-<p>First, I had to open the Module Settings for<span>&nbsp;grails-script</span>&nbsp;and remove the entry under &#8216;Source Folders&#8217;. This was causing IntelliJ to not save any edits I made to the module properties. It appears that this entry isn&#8217;t needed anyway (and I haven&#8217;t run into any issues with it yet).</p>
-
-
-<p>Second, the project wouldn&#8217;t compile because the following 2 classes couldn&#8217;t be found:&nbsp;<em>com.springsource.loaded.ReloadEventProcessorPlugin</em>and&nbsp;<em>com.springsource.loaded.Plugins</em>. After some searching, I found the&nbsp;<span>springloaded-core-1.0.2.jar</span>&nbsp;in my Gradle User Home (~/.gradle) directory (look under ~/.gradle/caches/artifacts-7, it maybe be something different then artifact-7). I copied this jar to my home directory, opened the Module Settings for grails-core-grails-core and added a Jar Dependency that pointed to the springloaded-core-1.0.2.jar in my home directory.</p>
-
-
-<p>Third, the grails-plugin-validation module won&#8217;t compile because it was missing a dependency to the grails-web module. Again, I opened the Module Settings for grails-plugin-validation and added a Module Dependency to grails-web.</p>
-
+<p>Third, the <code>grails-plugin-validation</code> module won&rsquo;t compile because it was missing a dependency to the <code>grails-web</code> module. Again, I opened the Module Settings for <code>grails-plugin-validation</code> and added a Module Dependency to <code>grails-web</code>.</p>
 
 <p>Now, I can finally run and debug my tests and get working on some patches.</p>
-
 </div>
 
 

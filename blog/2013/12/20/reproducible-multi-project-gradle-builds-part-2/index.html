@@ -9,7 +9,7 @@
   <meta name="author" content="John Engelman">
 
   
-  <meta name="description" content="Follow up to my previous post -&nbsp;Reproducible Multi-Project Gradle builds I got around to doing some testing on this using a simple Gradle &hellip;">
+  <meta name="description" content="Follow up to my previous post - Reproducible Multi-Project Gradle builds I got around to doing some testing on this using a simple Gradle project. &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -30,6 +30,18 @@
 <link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
 
   
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-321220-4']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
 
 </head>
 
@@ -83,133 +95,362 @@
 
 <time datetime="2013-12-20T10:02:15-06:00" pubdate data-updated="true"></time>
         
+        
       </p>
     
   </header>
 
 
-<div class="entry-content"><p>Follow up to my previous post -&nbsp;<a href="http://imperceptiblethoughts.com/post/70296784559/reproducible-multi-project-gradle-builds"><span>Reproducible Multi-Project Gradle builds</span></a></p>
+<div class="entry-content"><p>Follow up to my previous post - <a href="http://imperceptiblethoughts.com/post/70296784559/reproducible-multi-project-gradle-builds">Reproducible Multi-Project Gradle builds</a></p>
 
+<p>I got around to doing some testing on this using a simple Gradle project. Very quickly did I find out that this particular strategy was not going to be easy&hellip;.and potentially impossible.</p>
 
-<p><span>I got around to doing some testing on this using a simple Gradle project. Very quickly did I find out that this particular strategy was not going to be easy&#8230;.and potentially impossible.</span></p>
-
-
-<p><strong>Problem 1 - Setting Timestamp value on Jar Entry&#8217;s</strong></p>
-
+<h2>Problem 1 - Setting Timestamp value on Jar Entry&rsquo;s</h2>
 
 <p>The first problem I ran into was actually setting the timestamp value of a Jar Entry. My first attempt looked something like this:</p>
 
-
-<p><a class="gist" href="https://gist.github.com/johnrengelman/8055368.js?file=build-1a.gradle">Build-1a.gradle</a></p>
-
-
-<p>Yup. That didn&#8217;t work. Jar&#8217;s are more or less read-only. So in order to change the time stamp, I needed to write out a new Jar file with the modified entries. Basically, create a new jar file, iterate over the entries from the first jar file, clone them, modified the time stamp, add the cloned entry to the new jar file and then binary copy the data from the first jar file to the second. It looks something like this:</p>
-
-
-<p><a class="gist" href="https://gist.github.com/johnrengelman/8055368.js?file=build-1b.gradle">Build-1b.gradle</a></p>
-
-
-<p><strong>Problem 2 - JAR &#8220;Magic&#8221; Extra Byte</strong></p>
-
-
-<p>The next issue I encountered was that my new Jar file always had an entry that didn&#8217;t match the original Jar for it&#8217;s &#8216;extra&#8217; property. JarEntry.geExtra() returns a byte[]. In the orignal file, this was null, but in my copied file it was set to some data. I finally found that it is from the implementation of <a href="http://grepcode.com/file/repository.grepcode.com/java/root/jdk/openjdk/7-b147/java/util/jar/JarOutputStream.java">JarOutputStream</a> in Java.</p>
-
-
-<p>This Jar MAGIC byte gets added to the first entry in the Jar file. I haven&#8217;t been able to find any documentation on what it is for, but a friend thought it was likely for the Jar tool itself to determine if an archive file is actually a Jar.</p>
+<div><script src='https://gist.github.com/8055368.js?file=build-1a.gradle'></script>
+<noscript><pre><code>jar {
+        doLast {
+            long ts = fileTree('.') {
+                exclude 'build/**'
+            }.files.sort {
+                -(it.lastModified())
+            }.first().lastModified()
+            JarFile jf = new JarFile(archivePath)
+            jf.entries().each { entry -&gt;
+                entry.time = ts
+            }
+            jf.close()
+        }
+}</code></pre></noscript></div>
 
 
-<p>Curiously, Jar files produced by the Gradle Jar task, do NOT have this magic byte. Digging into their code, I found that they use a ZipOutputStream to write out the Jar file which doesn&#8217;t have this magic byte code. Using ZipOutputStream and ZipEntry works just as fine and avoids this, so we update the build to do the same:</p>
+<p>Yup. That didn&rsquo;t work. Jar&rsquo;s are more or less read-only. So in order to change the time stamp, I needed to write out a new Jar file with the modified entries. Basically, create a new jar file, iterate over the entries from the first jar file, clone them, modified the time stamp, add the cloned entry to the new jar file and then binary copy the data from the first jar file to the second. It looks something like this:</p>
+
+<!-- more -->
 
 
-<p><a class="gist" href="https://gist.github.com/johnrengelman/8055368.js?file=build-2.gradle">Build-2.gradle</a></p>
 
 
-<p><strong>Problem 3 - Zip timestamp spec</strong></p>
+<div><script src='https://gist.github.com/8055368.js?file=build-1b.gradle'></script>
+<noscript><pre><code>jar {
+        doLast {
+            long ts = fileTree('.') {
+                exclude 'build/**'
+            }.files.sort {
+                -(it.lastModified())
+            }.first().lastModified()
+            File newJar = new File(archivePath.parent, 'new-' + archiveName)
+            JarOutputStream jos = new JarOutputStream(new FileOutputStream(newJar))
+            JarFile jf = new JarFile(archivePath)
+            jf.entries().each { entry -&gt;
+                cloneAndCopyEntry(jf, entry, jos, ts)
+            }
+            jos.finish()
+            jf.close()
+        }
+}
+
+void cloneAndCopyEntry(JarFile originalFile, JarEntry original, JarOutputStream jos, long newTimestamp) {
+        JarEntry clone = new JarEntry(original)
+        clone.time = newTimestamp
+        def entryIs = originalFile.getInputStream(original)
+        jos.putNextEntry(clone)
+        copyBinaryData(entryIs, jos)
+}
+
+void copyBinaryData(InputStream is, JarOutputStream jos) {
+        byte[] buffer = new byte[1024]
+        int len = 0
+        while((len = is.read(buffer)) != -1) {
+            jos.write(buffer, 0, len)
+        }        
+}</code></pre></noscript></div>
 
 
-<p>After all this, I still wasn&#8217;t getting subsequent builds of the Jar to have matching checksums. I wrote a method that at the end of producing the timestamp adjusted Jar iterated over all the entries and compared all the fields to the original except the time field which I compared to the expected time stamp. Looks like this:</p>
+<h2>Problem 2 - JAR &ldquo;Magic&rdquo; Extra Byte</h2>
+
+<p>The next issue I encountered was that my new Jar file always had an entry that didn&rsquo;t match the original Jar for it&rsquo;s &lsquo;extra&rsquo; property. <code>JarEntry.geExtra()</code> returns a <code>byte[]</code>. In the orignal file, this was null, but in my copied file it was set to some data. I finally found that it is from the implementation of <a href="http://grepcode.com/file/repository.grepcode.com/java/root/jdk/openjdk/7-b147/java/util/jar/JarOutputStream.java">JarOutputStream</a> in Java.</p>
+
+<p>This Jar MAGIC byte gets added to the first entry in the Jar file. I haven&rsquo;t been able to find any documentation on what it is for, but a friend thought it was likely for the Jar tool itself to determine if an archive file is actually a Jar.</p>
+
+<p>Curiously, Jar files produced by the Gradle Jar task, do <strong>NOT</strong> have this magic byte. Digging into their code, I found that they use a <code>ZipOutputStream</code> to write out the Jar file which doesn&rsquo;t have this magic byte code. Using <code>ZipOutputStream</code> and <code>ZipEntry</code> works just as fine and avoids this, so we update the build to do the same:</p>
+
+<div><script src='https://gist.github.com/8055368.js?file=build-2.gradle'></script>
+<noscript><pre><code>jar {
+        doLast {
+            long ts = fileTree('.') {
+                exclude 'build/**'
+            }.files.sort {
+                -(it.lastModified())
+            }.first().lastModified()
+            File newJar = new File(archivePath.parent, 'new-' + archiveName)
+            ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(newJar))
+            JarFile jf = new JarFile(archivePath)
+            jf.entries().each { entry -&gt;
+                cloneAndCopyEntry(jf, entry, zos, ts)
+            }
+            zos.finish()
+            jf.close()
+        }
+}
+
+void cloneAndCopyEntry(JarFile originalFile, JarEntry original, ZipOutputStream zos, long newTimestamp) {
+        ZipEntry clone = new ZipEntry(original)
+        clone.time = newTimestamp
+        def entryIs = originalFile.getInputStream(original)
+        zos.putNextEntry(clone)
+        copyBinaryData(entryIs, zos)
+}
+
+void copyBinaryData(InputStream is, ZipOutputStream zos) {
+        byte[] buffer = new byte[1024]
+        int len = 0
+        while((len = is.read(buffer)) != -1) {
+            zos.write(buffer, 0, len)
+        }        
+}</code></pre></noscript></div>
 
 
-<p><a class="gist" href="https://gist.github.com/johnrengelman/8055368.js?file=build-3a.gradle">Build-3a.gradle</a></p>
+<h2>Problem 3 - Zip timestamp spec</h2>
+
+<p>After all this, I still wasn&rsquo;t getting subsequent builds of the Jar to have matching checksums. I wrote a method that at the end of producing the timestamp adjusted Jar iterated over all the entries and compared all the fields to the original except the time field which I compared to the expected time stamp. Looks like this:</p>
+
+<div><script src='https://gist.github.com/8055368.js?file=build-3a.gradle'></script>
+<noscript><pre><code>jar {
+        doLast {
+            long ts = fileTree('.') {
+                exclude 'build/**'
+            }.files.sort {
+                -(it.lastModified())
+            }.first().lastModified()
+            File newJar = new File(archivePath.parent, 'new-' + archiveName)
+            ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(newJar))
+            JarFile jf = new JarFile(archivePath)
+            jf.entries().each { entry -&gt;
+                cloneAndCopyEntry(jf, entry, zos, ts)
+            }
+            zos.finish()
+            jf.close()
+            compareJars(archivePath, newJar, ts)
+        }
+}
+
+void compareJars(File original, File copy, long ts) {
+    def jf = new JarFile(original)
+    def cjf = new JarFile(copy)
+    jf.entries().each { entry -&gt;
+        def centry = cjf.getJarEntry(entry.name)
+        compareEntries(entry, centry, ts)
+    }
+}
+
+void compareEntries(JarEntry entry, JarEntry centry, long ts) {
+    assert entry.name == centry.name
+    assert entry.comment == centry.comment
+    assert entry.compressedSize == centry.compressedSize
+    assert entry.crc == centry.crc
+    assert entry.extra == centry.extra
+    assert entry.method == centry.method
+    assert entry.size == centry.size
+    assert ts == centry.time
+    assert entry.hashCode() == centry.hashCode()
+}
+
+void cloneAndCopyEntry(JarFile originalFile, JarEntry original, ZipOutputStream zos, long newTimestamp) {
+        ZipEntry clone = new ZipEntry(original)
+        clone.time = newTimestamp
+        def entryIs = originalFile.getInputStream(original)
+        zos.putNextEntry(clone)
+        copyBinaryData(entryIs, zos)
+}
+
+void copyBinaryData(InputStream is, ZipOutputStream zos) {
+        byte[] buffer = new byte[1024]
+        int len = 0
+        while((len = is.read(buffer)) != -1) {
+            zos.write(buffer, 0, len)
+        }        
+}</code></pre></noscript></div>
 
 
-<p>This showed me that some entries still didn&#8217;t have the same timestamp. Curiously, they were always off by 1 second (1000 milliseconds in the script). Digging back into the Java source code for <a href="http://grepcode.com/file/repository.grepcode.com/java/root/jdk/openjdk/7-b147/java/util/zip/ZipEntry.java#ZipEntry.setTime%28long%29">ZipEntry</a>, I found it was doing some sort of unix - DOS conversion and was losing the resolution of the time.</p>
-
+<p>This showed me that some entries still didn&rsquo;t have the same timestamp. Curiously, they were always off by 1 second (1000 milliseconds in the script). Digging back into the Java source code for <a href="http://grepcode.com/file/repository.grepcode.com/java/root/jdk/openjdk/7-b147/java/util/zip/ZipEntry.java#ZipEntry.setTime%28long%29">ZipEntry</a>, I found it was doing some sort of unix - DOS conversion and was losing the resolution of the time.</p>
 
 <p>After a call out to the Twitterverse, a friend pointed out that the <a href="http://ant.apache.org/manual/Tasks/zip.html">Zip Spec</a> specifies that Zip entries have a time resolution of 2 seconds:</p>
 
-
-<blockquote>
-<p><span>The&nbsp;</span><code>update</code><span>&nbsp;parameter controls what happens if the ZIP file already exists. When set to&nbsp;</span><code>yes</code><span>, the ZIP file is updated with the files specified. (New files are added; old files are replaced with the new versions.) When set to&nbsp;</span><code>no</code><span>&nbsp;(the default) the ZIP file is overwritten if any of the files that would be added to the archive are newer than the entries inside the archive. Please note that ZIP files store file modification times with a granularity of two seconds. If a file is less than two seconds newer than the entry in the archive, Apache Ant will not consider it newer.</span></p>
-</blockquote>
-
+<blockquote><p>The <code>update</code> parameter controls what happens if the ZIP file already exists. When set to <code>yes</code>, the ZIP file is updated with the files specified. (New files are added; old files are replaced with the new versions.) When set to <code>no</code> (the default) the ZIP file is overwritten if any of the files that would be added to the archive are newer than the entries inside the archive. Please note that ZIP files store file modification times with a granularity of two seconds. If a file is less than two seconds newer than the entry in the archive, Apache Ant will not consider it newer.</p></blockquote>
 
 <p>So, we need to mimic this same behavior when producing our new Jar. Basically, we need to convert our timestamp to a resolution of 2 seconds. It looks like this:</p>
 
+<div><script src='https://gist.github.com/8055368.js?file=build-3b.gradle'></script>
+<noscript><pre><code>jar {
+        doLast {
+            long ts = fileTree('.') {
+                exclude 'build/**'
+            }.files.sort {
+                -(it.lastModified())
+            }.first().lastModified()
+            File newJar = new File(archivePath.parent, 'new-' + archiveName)
+            ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(newJar))
+            JarFile jf = new JarFile(archivePath)
+            jf.entries().each { entry -&gt;
+                long adjustedTs = convertTimestamp(ts)
+                cloneAndCopyEntry(jf, entry, zos, adjustedTs)
+            }
+            zos.finish()
+            jf.close()
+            compareJars(archivePath, newJar, ts)
+        }
+}
 
-<p><a class="gist" href="https://gist.github.com/johnrengelman/8055368.js?file=build-3b.gradle">Build-3b.gradle</a></p>
+long convertTimestamp(long timestamp) {
+    long seconds = timestamp / 1000
+    if (seconds % 2 != 0) {
+        seconds += 1
+    }
+    return 1000 * seconds
+}
+
+void compareJars(File original, File copy, long ts) {
+    def jf = new JarFile(original)
+    def cjf = new JarFile(copy)
+    long adjustedTs = convertTimestamp(ts)
+    jf.entries().each { entry -&gt;
+        def centry = cjf.getJarEntry(entry.name)
+        compareEntries(entry, centry, adjustedTs)
+    }
+}
+
+void compareEntries(JarEntry entry, JarEntry centry, long ts) {
+    assert entry.name == centry.name
+    assert entry.comment == centry.comment
+    assert entry.compressedSize == centry.compressedSize
+    assert entry.crc == centry.crc
+    assert entry.extra == centry.extra
+    assert entry.method == centry.method
+    assert entry.size == centry.size
+    assert ts == centry.time
+    assert entry.hashCode() == centry.hashCode()
+}
+
+void cloneAndCopyEntry(JarFile originalFile, JarEntry original, ZipOutputStream zos, long newTimestamp) {
+        ZipEntry clone = new ZipEntry(original)
+        clone.time = newTimestamp
+        def entryIs = originalFile.getInputStream(original)
+        zos.putNextEntry(clone)
+        copyBinaryData(entryIs, zos)
+}
+
+void copyBinaryData(InputStream is, ZipOutputStream zos) {
+        byte[] buffer = new byte[1024]
+        int len = 0
+        while((len = is.read(buffer)) != -1) {
+            zos.write(buffer, 0, len)
+        }        
+}</code></pre></noscript></div>
 
 
-<p><strong>Problem 4 - Groovy _timestamp static field</strong></p>
+<h2>Problem 4 - Groovy <code>_timestamp</code> static field</h2>
 
+<p>This got my Jars closer, but they still weren&rsquo;t checksumming the same. At this point, I started using a hex viewer to compare the two files. I used <a href="http://ridiculousfish.com/hexfiend/">Hex Fiend</a> because it can do a side by side diff of files and is free</p>
 
-<p>This got my Jars closer, but they still weren&#8217;t checksumming the same. At this point, I started using a hex viewer to compare the two files. I used <a href="http://ridiculousfish.com/hexfiend/">Hex Fiend</a>&nbsp;because it can do a side by side diff of files and is free.&nbsp;</p>
+<p>Using a Hex viewer on a Jar file doesn&rsquo;t do much since the data is compressed, but it can get you pointed in the right direction. In my cause I could see some byte differences around what appeared to be some class declarations</p>
 
-
-<p>Using a Hex viewer on a Jar file doesn&#8217;t do much since the data is compressed, but it can get you pointed in the right direction. In my cause I could see some byte differences around what appeared to be some class declarations</p>
-
-
-<p><img alt="image" src="https://31.media.tumblr.com/2fc2021f78566cce91727188d905e78c/tumblr_inline_my43h20E3u1rid3vx.png" /></p>
-
-
-<p></p>
-
+<p><img src="/images/hex1.png" alt="Hex View 1" /></p>
 
 <p>Next step was to explode the Jars and compare each of the files. This should a pretty apparent difference</p>
 
+<p><img src="/images/hex2.png" alt="Hex View 2" /></p>
 
-<p><img alt="image" src="https://31.media.tumblr.com/bac60decc770e66835f1cc2e70e43d7d/tumblr_inline_my43jc5nNP1rid3vx.png" /></p>
+<p>There was a binary difference in the class file produced by subsequent compilations. The difference was related to a filed named <code>__timestamp_239_neverHappen1387492963633</code></p>
+
+<p>That&rsquo;s an interesting field, because there&rsquo;s nothing like that in my source file:</p>
+
+<div><script src='https://gist.github.com/8055368.js?file=EchoApp.groovy'></script>
+<noscript><pre><code>package john.app
+
+import john.lib.EchoUtil
+
+class EchoApp {
+
+    public static void main(String[] args) {
+        args.each {
+            EchoUtil.echo(it)
+        }
+    }
+}</code></pre></noscript></div>
 
 
-<p></p>
+<p>Opening the <code>.class</code> file with a Java Decompiler (JD-GUI in this case), we see this for the class:</p>
 
+<div><script src='https://gist.github.com/8055368.js?file=EchoApp.class'></script>
+<noscript><pre><code>package john.app;
 
-<p>There was a binary difference in the class file produced by subsequent compilations. The difference was related to a filed named &#8220;__timestamp_239_neverHappen1387492963633&#8221;.&nbsp;</p>
+import groovy.lang.Closure;
+import groovy.lang.GroovyObject;
+import groovy.lang.MetaClass;
+import john.lib.EchoUtil;
+import org.codehaus.groovy.runtime.GeneratedClosure;
+import org.codehaus.groovy.runtime.callsite.CallSite;
 
+public class EchoApp
+  implements GroovyObject
+{
+  public EchoApp()
+  {
+    EchoApp this;
+    CallSite[] arrayOfCallSite = $getCallSiteArray();
+    MetaClass localMetaClass = $getStaticMetaClass();
+    this.metaClass = localMetaClass;
+  }
 
-<p>That&#8217;s an interesting field, because there&#8217;s nothing like that in my source file:</p>
+  public static void main(String[] args)
+  {
+    CallSite[] arrayOfCallSite = $getCallSiteArray(); arrayOfCallSite[0].call(args, new _main_closure1(EchoApp.class)); } 
+  static { __$swapInit();
+    long l1 = 0L;
+    __timeStamp__239_neverHappen1387493347537 = l1;
+    long l2 = 1387493347537L; } 
+  class _main_closure1 extends Closure implements GeneratedClosure { public _main_closure1(Object _thisObject) { super(_thisObject); } 
+    public Object doCall(Object it) { CallSite[] arrayOfCallSite = $getCallSiteArray(); return arrayOfCallSite[0].call(EchoUtil.class, it);
+    }
 
+    public Object doCall()
+    {
+      CallSite[] arrayOfCallSite = $getCallSiteArray();
+      return doCall(null);
+    }
 
-<p><a class="gist" href="https://gist.github.com/johnrengelman/8055368.js?file=EchoApp.groovy">EchoApp.groovy</a></p>
-
-
-<p>Opening the .class file with a Java Decompiler (JD-GUI in this case), we see this for the class:</p>
-
-
-<p><a class="gist" href="https://gist.github.com/johnrengelman/8055368.js?file=EchoApp.class">EchoApp.class</a></p>
+    static
+    {
+      __$swapInit();
+    }
+  }
+}</code></pre></noscript></div>
 
 
 <p>There is in fact a private variable being initialized. Opening the other copy of this class revealed that the name of this variable was changing:</p>
 
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">__timeStamp__239_neverHappen1387493347537</span> <span class="o">=</span> <span class="n">l1</span><span class="o">;</span>
+</span></code></pre></td></tr></table></div></figure>
 
-<blockquote>
-<p>__timeStamp__239_neverHappen1387493347537 = l1;</p>
+
 <p>vs.</p>
-<p>__timeStamp__239_neverHappen1387492963633 = l1;</p>
-</blockquote>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">__timeStamp__239_neverHappen1387492963633</span> <span class="o">=</span> <span class="n">l1</span><span class="o">;</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
-<p>Hmmm. That&#8217;s odd. A little more digging lead me to this <a href="https://jira.codehaus.org/browse/GROOVY-6308" title="Groovy-6308: Timestamps in bytecode prevents baselining of code">Groovy-6308</a>. The title of this bug is &#8220;Timestamps in bytecode prevents baselining of code&#8221;. Yup, this seems to be my problem.</p>
+<p>Hmmm. That&rsquo;s odd. A little more digging lead me to this <a href="https://jira.codehaus.org/browse/GROOVY-6308">Groovy-6308</a> - Timestamps in bytecode prevents baselining of code. The title of this bug is &ldquo;Timestamps in bytecode prevents baselining of code&rdquo;. Yup, this seems to be my problem.</p>
 
+<p>It appears this field is injected as some sort of addition to <code>SerialVersionUUID</code>, though the corresponding conversations of that bug and the related bugs seems to indicate that it&rsquo;s not really used for anything.</p>
 
-<p>It appears this field is injected as some sort of addition to SerialVersionUUID, though the corresponding conversations of that bug and the related bugs seems to indicate that it&#8217;s not really used for anything.</p>
+<p>Unfortunately, the bugs are listed as being targeted for Groovy 3.0 which doesn&rsquo;t help me in the near term.</p>
 
-
-<p>Unfortunately, the bugs are listed as being targeted for Groovy 3.0 which doesn&#8217;t help me in the near term.</p>
-
-
-<p>At this point, since it&#8217;s a compiler function that&#8217;s stopping me, I&#8217;m not sure I have a path forward. This will probably get back burnered for a while since it&#8217;s not critical and more of a thought experiment than anything.</p>
-
+<p>At this point, since it&rsquo;s a compiler function that&rsquo;s stopping me, I&rsquo;m not sure I have a path forward. This will probably get back burnered for a while since it&rsquo;s not critical and more of a thought experiment than anything.</p>
 </div>
 
 

@@ -30,6 +30,18 @@
 <link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
 
   
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-321220-4']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
 
 </head>
 
@@ -83,6 +95,7 @@
 
 <time datetime="2014-01-27T12:09:47-06:00" pubdate data-updated="true"></time>
         
+        
       </p>
     
   </header>
@@ -90,15 +103,12 @@
 
 <div class="entry-content"><p>I am happy to announce that the 2.0.0 release for the Grails-Gradle plugin has finally been released.</p>
 
-
 <p>This release has been a long time coming, and offers some significant improvements over the 1.1.0 release. Additionally, many people have been relying on the 2.0.0-SNAPSHOT release and this locks-in a stable version that is now available in Maven Central and the Grails Central repositories.</p>
-
 
 <p><strong>ChangeLog</strong></p>
 
-
 <ul>
-<li>Automatic configuration of Grails repositories using &#8216;grails.central()&#8217; in your &#8216;repositories&#8217; block</li>
+<li>Automatic configuration of Grails repositories using <code>grails.central()</code> in your <code>repositories</code> block</li>
 <li>Automatic configuration of Grails, Groovy, and Spring Loaded versions</li>
 <li>Implementation of a build task structure more similar to a standard Java project (i.e. clean, build, assemble, test, check ,etc.)</li>
 <li>Better integration with IntelliJ IDEA (plugin source is now available)</li>
@@ -107,8 +117,7 @@
 </ul>
 
 
-<p>Additional information can be found on the plugin&#8217;s Github <a href="https://github.com/grails/grails-gradle-plugin">page</a>.</p>
-
+<p>Additional information can be found on the plugin&rsquo;s Github <a href="https://github.com/grails/grails-gradle-plugin">page</a>.</p>
 </div>
 
 

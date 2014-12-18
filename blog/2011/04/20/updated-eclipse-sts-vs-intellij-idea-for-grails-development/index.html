@@ -9,7 +9,7 @@
   <meta name="author" content="John Engelman">
 
   
-  <meta name="description" content="So, I have become increasingly frustrated with IntelliJ for doing Grails development. I know. Everyone swears by it being "THE" IDE for Grails work, &hellip;">
+  <meta name="description" content="So, I have become increasingly frustrated with IntelliJ for doing Grails development. I know. Everyone swears by it being &ldquo;THE&rdquo; IDE for &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -30,6 +30,18 @@
 <link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
 
   
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-321220-4']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
 
 </head>
 
@@ -83,70 +95,34 @@
 
 <time datetime="2011-04-20T08:43:00-05:00" pubdate data-updated="true"></time>
         
+        
       </p>
     
   </header>
 
 
-<div class="entry-content"><p>So, I have become increasingly frustrated with IntelliJ for doing Grails development. I know. Everyone swears by it being &#8220;THE&#8221; IDE for Grails work, but I just can&#8217;t get on that boat. Not only do I find the UI a total cluster-fuck and it nearly impossible to find the information that I want on the screen when I want it, but it is also a serious resource hog.<img alt="" class="mceWPmore" src="http://johnrengelman.com/wp-includes/js/tinymce/plugins/wordpress/img/trans.gif" title="More..." /></p>
+<div class="entry-content"><p>So, I have become increasingly frustrated with IntelliJ for doing Grails development. I know. Everyone swears by it being &ldquo;THE&rdquo; IDE for Grails work, but I just can&rsquo;t get on that boat. Not only do I find the UI a total cluster-fuck and it nearly impossible to find the information that I want on the screen when I want it, but it is also a serious resource hog.</p>
+
+<!-- more -->
 
 
-<p>I have a brand new Sandy Bridge, Quad-Core Macbook Pro with 4 GB of RAM and I&#8217;m constantly fighting with IntelliJ when it&#8217;s doing something. This is my machine on any given day: iTunes, Twitter Client, Skype Client, Chrome (w/ 4 open tabs), Firefox (maybe), and IntelliJ&#8230;that&#8217;s it. That&#8217;s all I have running. There are a couple background apps (Dropbox, TunnelBlick SSH) but that&#8217;s really all that I have running&#8230;yet I still have to constantly wait for IntelliJ to do things&#8230;I get the stupid beach ball, wait-while-I-inexplicably-tie-up-4-core-and-4-GB-of-RAM-for-no-damn-reason icon. UGH. So frustrating. Not to mention, IntelliJ&#8217;s inability to perform the simplest in task in Subversion without you having to walk away for 10 mins while it does it.</p>
+<p>I have a brand new Sandy Bridge, Quad-Core Macbook Pro with 4 GB of RAM and I&rsquo;m constantly fighting with IntelliJ when it&rsquo;s doing something. This is my machine on any given day: iTunes, Twitter Client, Skype Client, Chrome (w/ 4 open tabs), Firefox (maybe), and IntelliJ&hellip;that&rsquo;s it. That&rsquo;s all I have running. There are a couple background apps (Dropbox, TunnelBlick SSH) but that&rsquo;s really all that I have running&hellip;yet I still have to constantly wait for IntelliJ to do things&hellip;I get the stupid beach ball, wait-while-I-inexplicably-tie-up-4-core-and-4-GB-of-RAM-for-no-damn-reason icon. UGH. So frustrating. Not to mention, IntelliJ&rsquo;s inability to perform the simplest in task in Subversion without you having to walk away for 10 mins while it does it.</p>
 
+<p>So I&rsquo;ve decided on a little experiment. SpringSource recently released version 2.6.0-SR1 of their STS tool set. STS is build on top of the Eclipse&hellip;what I consider the premiere Java IDE. So I&rsquo;m installing. And I&rsquo;m going to see if I can get some work done in STS for the rest of the week. And next week, I&rsquo;ll come back to this post with some thoughts and a final decision on what I&rsquo;m going to use.</p>
 
-<p>So I&#8217;ve decided on a little experiment. SpringSource recently released version 2.6.0-SR1 of their STS tool set. STS is build on top of the Eclipse&#8230;what I consider the premiere Java IDE. So I&#8217;m installing. And I&#8217;m going to see if I can get some work done in STS for the rest of the week. And next week, I&#8217;ll come back to this post with some thoughts and a final decision on what I&#8217;m going to use.</p>
+<h2>Initial Impressions</h2>
 
+<p>I installed STS without any problems on my machine, but quickly found that I needed some items to get up and running. Surprise, surprise. First, you need to install/activate the Grails support for STS. This is done from the STS Dashboard when the application first starts up. I should have remembered this since a co-worker wrote an article about STS/Grails not to long ago: <a href="http://www.objectpartners.com/2011/02/15/start-using-eclipse-with-grails-support-via-sts/">Start Using Eclipse with Grails Support via STS</a>.</p>
 
-<p><strong>Initial Impressions</strong></p>
+<p>Done. Next step, get my project from SVN. Fail. Apparently STS doesn&rsquo;t ship with Subclipse installed by default. Really not that big of a surprise, since Eclipse doesn&rsquo;t either. Just another annoyance.</p>
 
+<h2>Development</h2>
 
-<p>I installed STS without any problems on my machine, but quickly found that I needed some items to get up and running. Surprise, surprise. First, you need to install/activate the Grails support for STS. This is done from the STS Dashboard when the application first starts up. &nbsp;I should have remembered this since a co-worker wrote an article about STS/Grails not to long ago:&nbsp;<a href="http://www.objectpartners.com/2011/02/15/start-using-eclipse-with-grails-support-via-sts/">Start Using Eclipse with Grails Support via STS</a>.</p>
+<p>After finally getting my project checked out and configuring some additional source folders so Eclipse could find all the Groovy classes, I got up a running. Yet there was one nagging issue I couldn&rsquo;t seem to resolve. Apparently STS applies Java Code checks to Groovy files. In most cases this is valid, since Groovy is built on top of Java. However, STS kept finding one error that really annoyed me (disclaimer: I know the following code example is actually bad code. It&rsquo;s not mine. I also know how to fix it, but I&rsquo;m not going to since it&rsquo;s production code. Plus, it&rsquo;s valid in Groovy for whatever reason).</p>
 
+<h2>End Game</h2>
 
-<p>Done. Next step, get my project from SVN. Fail. Apparently STS doesn&#8217;t ship with Subclipse installed by default. Really not that big of a surprise, since Eclipse doesn&#8217;t either. Just another annoyance.</p>
-
-
-<p><strong>Development</strong></p>
-
-
-<p>After finally getting my project checked out and configuring some additional source folders so Eclipse could find all the Groovy classes, I got up a running. Yet there was one nagging issue I couldn&#8217;t seem to resolve. Apparently STS applies Java Code checks to Groovy files. In most cases this is valid, since Groovy is built on top of Java. However, STS kept finding one error that really annoyed me (disclaimer: I know the following code example is actually bad code. It&#8217;s not mine. I also know how to fix it, but I&#8217;m not going to since it&#8217;s production code. Plus, it&#8217;s valid in Groovy for whatever reason).</p>
-
-
-<p><em>The Problem</em></p>
-
-
-<p>STS kept finding a &#8220;cannot reduce inherited method visibility error&#8221; on some Groovy classes. Here is the example code.</p>
-
-
-<pre>abstract class Foo {
-   <span>public</span> abstract def bar();
-}
-
-class FooImpl {
-   @Overrides
-   protected def bar() {
-      return "Hello World!"
-   }
-}</pre>
-
-
-<p>Now, in Java, this would be an error since the&nbsp;a method defined without a visibility level would default to&nbsp;as&nbsp;&#8220;package&#8221;&nbsp;&#8220;public&#8221;. So&nbsp;<em>abstract&nbsp;<span>public</span>&nbsp;def bar()</em>would be&nbsp;<span>package</span>&nbsp;<span>public</span>&nbsp;visibility. However, the implementation class, reduces the visibility to&nbsp;<span>protected</span>&nbsp;which breaks the inheritance structure, since anythingin the same package&nbsp;should be able to call&nbsp;<em>Foo.bar()</em>&nbsp;and now we&#8217;ve limited access to only classes that extends&nbsp;<em>FooImpl</em>.</p>
-
-
-<p>However, in Groovy, this is slightly different. The same problem still arises, since the default for Groovy methods are&nbsp;<span>public</span>&nbsp;and we are reducing visibility to<span>protected</span>. However, the above code, compiles, and runs under Groovy/Grails just fine.</p>
-
-
-<p><em>The Solution</em></p>
-
-
-<p>I know the correct solution is to define&nbsp;<em>Foo.bar()</em>&nbsp;as being&nbsp;<span>protected</span>. Or remove the&nbsp;<span>protected</span>&nbsp;from&nbsp;<em>FooImpl.bar()</em>. But I wonder why, STS picks this up and IntelliJ does not. Especially since it is not a compilation error in Groovy.</p>
-
-
-<p><em>End Game</em></p>
-
-
-<p>It appears that STS still has some work to do with Groovy syntax support. Or maybe some way to adjust which Java Checks are applied to .groovy files. I&#8217;m still playing, but in the meantime, I&#8217;ve upgraded my machine to 8GB of RAM and IntelliJ is performing much better&#8230;crazy, that I need 8GB to get good performance, but oh well.</p>
-
+<p>It appears that STS still has some work to do with Groovy syntax support. Or maybe some way to adjust which Java Checks are applied to .groovy files. I&rsquo;m still playing, but in the meantime, I&rsquo;ve upgraded my machine to 8GB of RAM and IntelliJ is performing much better&hellip;crazy, that I need 8GB to get good performance, but oh well.</p>
 </div>
 
 

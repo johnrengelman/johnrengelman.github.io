@@ -30,6 +30,18 @@
 <link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
 
   
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-321220-4']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
 
 </head>
 
@@ -83,6 +95,7 @@
 
 <time datetime="2011-03-07T08:40:00-06:00" pubdate data-updated="true"></time>
         
+        
       </p>
     
   </header>
@@ -90,18 +103,16 @@
 
 <div class="entry-content"><p>Tonight, I decided to setup a multisite configuration for my Wordpress installation (which you are reading right now). My sister is involved in marketing and advertising and wanted to start her own blog. I figured this was a good opportunity to play with the server some more.</p>
 
-
-<p><img alt="" class="mceWPmore" src="http://johnrengelman.com/wp-includes/js/tinymce/plugins/wordpress/img/trans.gif" title="More..." />I decided to use the Subdomain configuration and the instructions found&nbsp;<a href="http://codex.wordpress.org/Create_A_Network">here</a>. Only, initially, I didn&#8217;t want to apply a blanket *.johnrengelman.com DNS redirect. I don&#8217;t know why I didn&#8217;t want to do this. It was an arbitrary decision on my part. An arbitrary decision that ended up costing me about 2 hours tonight :(</p>
-
-
-<p>Somehow, as I was configuring the DNS entries (using GoDaddy&#8217;s DNS Manager), I messed up something. After completing the installation in Wordpress, I couldn&#8217;t reach my sister&#8217;s&nbsp;<a href="http://amanda.johnrengelman.com/">site</a>. I could open any other sub-domain which would redirect to my homepage.</p>
+<!-- more -->
 
 
-<p>After backtracking and restoring backups and reinstalling, I still couldn&#8217;t open the site. The confusing part is that&nbsp;<em>nslookup</em>&nbsp;resolved the address correctly, but&nbsp;<em>ping</em>couldn&#8217;t reach my server. :-/ Very confusing.</p>
+<p>I decided to use the Subdomain configuration and the instructions found <a href="http://codex.wordpress.org/Create_A_Network">here</a>. Only, initially, I didn&rsquo;t want to apply a blanket <code>*.johnrengelman.com</code> DNS redirect. I don&rsquo;t know why I didn&rsquo;t want to do this. It was an arbitrary decision on my part. An arbitrary decision that ended up costing me about 2 hours tonight <img alt="frowning" src="/images/emoji/unicode/1f626.png" class="emoji" /></p>
 
+<p>Somehow, as I was configuring the DNS entries (using GoDaddy&rsquo;s DNS Manager), I messed up something. After completing the installation in Wordpress, I couldn&rsquo;t reach my sister&rsquo;s <a href="http://amanda.johnrengelman.com">site</a>. I could open any other sub-domain which would redirect to my homepage.</p>
 
-<p>It appears that some entry I placed into the DNS records propagated out and wasn&#8217;t immediately updated when I entered new settings. I decided to give up for a few minutes and when I came back, everything was working. Ugh. Server work is very frustrating at times.</p>
+<p>After backtracking and restoring backups and reinstalling, I still couldn&rsquo;t open the site. The confusing part is that <code>nslookup</code> resolved the address correctly, but <code>ping</code> couldn&rsquo;t reach my server. <img alt="confused" src="/images/emoji/unicode/1f615.png" class="emoji" /> Very confusing.</p>
 
+<p>It appears that some entry I placed into the DNS records propagated out and wasn&rsquo;t immediately updated when I entered new settings. I decided to give up for a few minutes and when I came back, everything was working. Ugh. Server work is very frustrating at times.</p>
 </div>
 
 

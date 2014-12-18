@@ -9,7 +9,7 @@
   <meta name="author" content="John Engelman">
 
   
-  <meta name="description" content="Lately I've been working on a way to create a reproducible build of my application source using Gradle. And by reproducible, I mean, when I run the &hellip;">
+  <meta name="description" content="Lately I&rsquo;ve been working on a way to create a reproducible build of my application source using Gradle. And by reproducible, I mean, when I run &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -30,6 +30,18 @@
 <link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
 
   
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-321220-4']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
 
 </head>
 
@@ -83,94 +95,119 @@
 
 <time datetime="2013-12-17T10:06:46-06:00" pubdate data-updated="true"></time>
         
+        
       </p>
     
   </header>
 
 
-<div class="entry-content"><p>Lately I&#8217;ve been working on a way to create a reproducible build of my application source using Gradle. And by reproducible, I mean, when I run the md5 or sha256 checksum on the resulting files, I get the same results.</p>
+<div class="entry-content"><p>Lately I&rsquo;ve been working on a way to create a reproducible build of my application source using Gradle. And by reproducible, I mean, when I run the md5 or sha256 checksum on the resulting files, I get the same results.</p>
 
-
-<p>This is a bit more complicate then I originally thought. The issue is that inherently, a Java Jar file includes the timestamp information for the files contained within. So, if you build a Jar and checksum it and then clean and rebuilt the Jar, even though the files are semantically identical, the resulting checksum&#8217;s will be different.</p>
-
+<p>This is a bit more complicate then I originally thought. The issue is that inherently, a Java Jar file includes the timestamp information for the files contained within. So, if you build a Jar and checksum it and then clean and rebuilt the Jar, even though the files are semantically identical, the resulting checksum&rsquo;s will be different.</p>
 
 <p>This is a problem in Continuous Integration/Deployment environments where you may be building from a clean VCS checkout every time but want to know only about the things that changed.</p>
 
-
-<p>Working around this in Gradle is a bit of mind twister. After thinking about this for a couple days, I&#8217;ve come up with this list of items that need to addressed to successfully accomplish what I&#8217;m trying to do.</p>
-
+<p>Working around this in Gradle is a bit of mind twister. After thinking about this for a couple days, I&rsquo;ve come up with this list of items that need to addressed to successfully accomplish what I&rsquo;m trying to do.</p>
 
 <ol>
-<li><span>Calculate a single timestamp for each artifact that Gradle produces</span></li>
-<li><span>Timestamp calculation needs to be sensitive to the Gradle project that produces the artifact.</span></li>
-<li><span>Timestamp calculation needs to be sensitive to any Gradle project dependencies for the project producing the artifact.</span></li>
-<li><span>Modify the resulting artifact to set the timestamp information for contents&nbsp;</span>uniformly<span>.&nbsp;</span></li>
+<li>Calculate a single timestamp for each artifact that Gradle produces</li>
+<li>Timestamp calculation needs to be sensitive to the Gradle project that produces the artifact.</li>
+<li>Timestamp calculation needs to be sensitive to any Gradle project dependencies for the project producing the artifact.</li>
+<li>Modify the resulting artifact to set the timestamp information for contents uniformly.</li>
 </ol>
 
 
-<p><span>After a quick Twitter conversation with Luke Daley, item 4 was knocked out by using Java&#8217;s ZipFile API to iterate over the jar&#8217;s contents and set the lastModified timestamp to a value, but that leaves the more critical timestamp calculations.</span></p>
+<p>After a quick Twitter conversation with <a href="http://twitter.com/ldaley">Luke Daley</a>, item 4 was knocked out by using Java&rsquo;s <code>ZipFile</code> API to iterate over the jar&rsquo;s contents and set the <code>lastModified</code> timestamp to a value, but that leaves the more critical timestamp calculations.</p>
 
+<p>Let&rsquo;s start with a mind experiment to figure out what we need. Let&rsquo;s assume we have the following Gradle project structure:</p>
 
-<p>Let&#8217;s start with a mind experiment to figure out what we need. Let&#8217;s assume we have the following Gradle project structure:</p>
-
-
-<blockquote>
-<p>myApp</p>
-<p>&nbsp; | - utils</p>
-<p>&nbsp; | - app</p>
-</blockquote>
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>myApp
+</span><span class='line'>  |- utils
+</span><span class='line'>  |- app</span></code></pre></td></tr></table></div></figure>
 
 
 <p>This is a simple Gradle multi-project build where we have the application as one project and a utility library as another.</p>
 
+<p>We check this code out and run a <code>./gradlew build</code> and calculate an MD5 checksum on <code>utils.jar</code> and <code>app.jar</code>:</p>
 
-<p>We check this code out and run a &#8216;./gradlew build&#8217; and calculate an MD5 checksum on utils.jar and app.jar:</p>
-
-
-<blockquote>
-<p><span>File &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Checksum</span></p>
-<p>utils.jar &nbsp; | &nbsp; A</p>
-<p>app.jar &nbsp; | &nbsp; B&nbsp;</p>
-</blockquote>
-
-
-<p>If I make a change to the app project and do a &#8216;./gradlew clean build&#8217;, we want the following to happen:</p>
-
-
-<blockquote>
-<p><span>File &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Checksum</span></p>
-<p>utils.jar &nbsp; | &nbsp; A</p>
-<p>app.jar &nbsp; | &nbsp; B&#8217;&nbsp;</p>
-</blockquote>
-
-
-<p>In this scenario, only the app.jar checksum would change because the utils project is functionally equivalent.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center;">   File    </th>
+<th style="text-align:center;"> Checksum </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;"> utils.jar </td>
+<td style="text-align:center;">    A     </td>
+</tr>
+<tr>
+<td style="text-align:center;">  app.jar  </td>
+<td style="text-align:center;">    B     </td>
+</tr>
+</tbody>
+</table>
 
 
-<p>However, if we start from our initial commit and change the utils project and do a &#8216;./gradlew clean build&#8217;, we want the following to happen:</p>
+<p>If I make a change to the <code>app</code> project and do a <code>./gradlew clean build</code>, we want the following to happen:</p>
+
+<table>
+<thead>
+<tr>
+<th style="text-align:center;">   File    </th>
+<th style="text-align:center;"> Checksum </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;"> utils.jar </td>
+<td style="text-align:center;">    A     </td>
+</tr>
+<tr>
+<td style="text-align:center;">  app.jar  </td>
+<td style="text-align:center;">    B&#8217;    </td>
+</tr>
+</tbody>
+</table>
 
 
-<blockquote>
-<p><span>File &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Checksum</span></p>
-<p>utils.jar &nbsp; | &nbsp; A&#8217;</p>
-<p>app.jar &nbsp; | &nbsp; B&#8217;</p>
-</blockquote>
+<p>In this scenario, only the <code>app.jar</code> checksum would change because the <code>utils</code> project is functionally equivalent.</p>
+
+<p>However, if we start from our initial commit and change the <code>utils</code> project and do a <code>./gradlew clean build</code>, we want the following to happen:</p>
+
+<table>
+<thead>
+<tr>
+<th style="text-align:center;">   File    </th>
+<th style="text-align:center;"> Checksum </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;"> utils.jar </td>
+<td style="text-align:center;">    A&#8217;    </td>
+</tr>
+<tr>
+<td style="text-align:center;">  app.jar  </td>
+<td style="text-align:center;">    B&#8217;    </td>
+</tr>
+</tbody>
+</table>
 
 
-<p>&nbsp;In this case with only a change to utils, we want both checksums to change because the app project is dependent upon the changed code in the utils library.</p>
+<p>In this case with only a change to <code>utils</code>, we want both checksums to change because the <code>app</code> project is dependent upon the changed code in the utils library.</p>
 
+<p>My initial thought was to use my VCS to get a timestamp for the latest change to the Gradle project being built. This would couple my build to the VCS being used, but that&rsquo;s an okay dependency in my opinion. Alternatively, the build could scan over the source contents and get the latest <code>lastModified</code> timestamp of any file contained within.</p>
 
-<p>My initial thought was to use my VCS to get a timestamp for the latest change to the Gradle project being built. This would couple my build to the VCS being used, but that&#8217;s an okay dependency in my opinion. Alternatively, the build could scan over the source contents and get the latest lastModified timestamp of any file contained within. &nbsp; &nbsp;</p>
+<p>Neither of these solutions would solve the issue with upstream libraries however. Somehow, we need to propagate the upstream project&rsquo;s information.</p>
 
+<p>I&rsquo;m not sure there is a <em>nice</em> way to do this, but my current thinking is to simulate this meta information by enforcing a commit to downstream projects when an upstream is modified. In my particular case, I would likely change the project&rsquo;s version of the upstream library by modifying the <code>build.gradle</code> file in that project. I could add a task that verifies that the downstream project has a version that is <em>at least</em> equivalent to any upstream projects&#8217; versions. This could run as part of the standard build process. This would force a change to the downstream&rsquo;s <code>build.gradle</code> thus indirectly updating the timestamp the VCS would report for that project.</p>
 
-<p>Neither of these solutions would solve the issue with upstream libraries however. Somehow, we need to propagate the upstream project&#8217;s information.</p>
-
-
-<p>I&#8217;m not sure there is a &#8220;nice&#8221; way to do this, but my current thinking is to simulate this meta information by enforcing a commit to downstream projects when an upstream is modified. In my particular case, I would likely change the project&#8217;s version of the upstream library by modifying the &#8216;build.gradle&#8217; file in that project. I could add a task that verify&#8217;s that the downstream project has a version that is &#8220;at least&#8221; equivalent to any upstream project&#8217;s versions. This could run as part of the standard build process. This would force a change to the downstream&#8217;s build.gradle thus indirectly updating the timestamp the VCS would report for that project.</p>
-
-
-<p>All of this is theoretical at this point, I&#8217;ve only started working on an implementation. I&#8217;ll update this post as I learn more.</p>
-
+<p>All of this is theoretical at this point, I&rsquo;ve only started working on an implementation. I&rsquo;ll update this post as I learn more.</p>
 </div>
 
 
