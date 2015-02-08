@@ -3,7 +3,7 @@ layout: post
 title: "Reproducible Multi-Project Gradle Builds (Part 2)"
 date: 2013-12-20T00:00:00-06:00
 ---
-Follow up to my previous post - [Reproducible Multi-Project Gradle builds]({% post_url 2013-12-17-reproducible-multi-project-gradle-builds})
+Follow up to my previous post - [Reproducible Multi-Project Gradle builds]({% post_url 2013-12-17-reproducible-multi-project-gradle-builds %})
 
 I got around to doing some testing on this using a simple Gradle project. Very quickly did I find out that this particular strategy was not going to be easy...and potentially impossible.
 
@@ -30,7 +30,7 @@ jar {
 
 Yup. That didn’t work. Jar’s are more or less read-only. So in order to change the time stamp, I needed to write out a new Jar file with the modified entries. Basically, create a new jar file, iterate over the entries from the first jar file, clone them, modified the time stamp, add the cloned entry to the new jar file and then binary copy the data from the first jar file to the second. It looks something like this:
 
-    <!-- more -->
+<!-- more -->
 
 ```groovy
 jar {
@@ -256,11 +256,11 @@ This got my Jars closer, but they still weren’t checksumming the same. At this
 
 Using a Hex viewer on a Jar file doesn’t do much since the data is compressed, but it can get you pointed in the right direction. In my cause I could see some byte differences around what appeared to be some class declarations
 
-![Hex View 1]({{ site.url }}/assets/hex1.png)
+![Hex View 1]({{ root_url }}/assets/hex1.png)
 
 Next step was to explode the Jars and compare each of the files. This should a pretty apparent difference
 
-![Hex View 2]({{ site.url }}/assets/hex2.png)
+![Hex View 2]({{ root_url }}/assets/hex2.png)
 
 There was a binary difference in the class file produced by subsequent compilations. The difference was related to a filed named `__timestamp_239_neverHappen1387492963633`
 
