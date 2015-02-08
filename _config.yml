@@ -17,3 +17,6 @@ kramdown:
 
 gems:
   - jemoji
+
+google_universal_analytics: UA-321220-4
+google_universal_analytics_cookiedomain: auto
