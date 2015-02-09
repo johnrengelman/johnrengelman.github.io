@@ -12,7 +12,6 @@
   <link rel="stylesheet" href="/css/main.css">
   <link rel="canonical" href="http://imperceptiblethoughts.com/2013/12/20/reproducible-multi-project-gradle-builds-part-2.html">
   <link rel="alternate" type="application/rss+xml" title="Imperceptible Thoughts" href="http://imperceptiblethoughts.com/feed.xml" />
-  
   <script>
     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
     (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -22,10 +21,8 @@
     ga('create', 'UA-321220-4', 'auto');
     ga('send', 'pageview');
   </script>
-
-
+  <link href='/stylesheets/all-b01009d3e5fab0595006e4f662fb5475.css' media='all' rel='stylesheet' type='text/css'>
 </head>
-
 
   <body>
 
@@ -59,7 +56,6 @@
 
 </header>
 
-
     <div class="page-content">
       <div class="wrapper">
         <div class="post">
@@ -78,60 +74,56 @@
 
 <p>The first problem I ran into was actually setting the timestamp value of a Jar Entry. My first attempt looked something like this:</p>
 
-<pre><code class="language-groovy">jar {
-  doLast {
-    long ts = fileTree('.') {
-      exclude 'build/**'
-    }.files.sort {
-      -(it.lastModified())
-    }.first().lastModified()
-    JarFile jf = new JarFile(archivePath)
-    jf.entries().each { entry -&gt;
-      entry.time = ts
-    }
-    jf.close()
-  }
-}
-</code></pre>
+<figure class="code-highlight-figure"><div class="code-highlight"><pre class="code-highlight-pre"><div data-line="1" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="n">jar</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="2" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="n">doLast</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="3" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="kt">long</span> <span class="n">ts</span> <span class="o">=</span> <span class="n">fileTree</span><span class="o">(</span><span class="s1">&#39;.&#39;</span><span class="o">)</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="4" class="code-highlight-row numbered"><div class="code-highlight-line">      <span class="n">exclude</span> <span class="s1">&#39;build/**&#39;</span>
+</div></div><div data-line="5" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="o">&#x7d;.</span><span class="na">files</span><span class="o">.</span><span class="na">sort</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="6" class="code-highlight-row numbered"><div class="code-highlight-line">      <span class="o">-(</span><span class="n">it</span><span class="o">.</span><span class="na">lastModified</span><span class="o">())</span>
+</div></div><div data-line="7" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="o">&#x7d;.</span><span class="na">first</span><span class="o">().</span><span class="na">lastModified</span><span class="o">()</span>
+</div></div><div data-line="8" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">JarFile</span> <span class="n">jf</span> <span class="o">=</span> <span class="k">new</span> <span class="n">JarFile</span><span class="o">(</span><span class="n">archivePath</span><span class="o">)</span>
+</div></div><div data-line="9" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">jf</span><span class="o">.</span><span class="na">entries</span><span class="o">().</span><span class="na">each</span> <span class="o">&#x7b;</span> <span class="n">entry</span> <span class="o">-&gt;</span>
+</div></div><div data-line="10" class="code-highlight-row numbered"><div class="code-highlight-line">      <span class="n">entry</span><span class="o">.</span><span class="na">time</span> <span class="o">=</span> <span class="n">ts</span>
+</div></div><div data-line="11" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="o">&#x7d;</span>
+</div></div><div data-line="12" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">jf</span><span class="o">.</span><span class="na">close</span><span class="o">()</span>
+</div></div><div data-line="13" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="o">&#x7d;</span>
+</div></div><div data-line="14" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="o">&#x7d;</span></div></div></pre></div></figure>
 
 <p>Yup. That didn’t work. Jar’s are more or less read-only. So in order to change the time stamp, I needed to write out a new Jar file with the modified entries. Basically, create a new jar file, iterate over the entries from the first jar file, clone them, modified the time stamp, add the cloned entry to the new jar file and then binary copy the data from the first jar file to the second. It looks something like this:</p>
 
 <!-- more -->
 
-<pre><code class="language-groovy">jar {
-  doLast {
-    long ts = fileTree('.') {
-      exclude 'build/**'
-    }.files.sort {
-      -(it.lastModified())
-    }.first().lastModified()
-    File newJar = new File(archivePath.parent, 'new-' + archiveName)
-    JarOutputStream jos = new JarOutputStream(new FileOutputStream(newJar))
-    JarFile jf = new JarFile(archivePath)
-    jf.entries().each { entry -&gt;
-      cloneAndCopyEntry(jf, entry, jos, ts)
-    }
-    jos.finish()
-    jf.close()
-  }
-}
-
-void cloneAndCopyEntry(JarFile originalFile, JarEntry original, JarOutputStream jos, long newTimestamp) {
-  JarEntry clone = new JarEntry(original)
-  clone.time = newTimestamp
-  def entryIs = originalFile.getInputStream(original)
-  jos.putNextEntry(clone)
-  copyBinaryData(entryIs, jos)
-}
-
-void copyBinaryData(InputStream is, JarOutputStream jos) {
-  byte[] buffer = new byte[1024]
-  int len = 0
-  while((len = is.read(buffer)) != -1) {
-    jos.write(buffer, 0, len)
-  }
-}
-</code></pre>
+<figure class="code-highlight-figure"><div class="code-highlight"><pre class="code-highlight-pre"><div data-line="1" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="n">jar</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="2" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="n">doLast</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="3" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="kt">long</span> <span class="n">ts</span> <span class="o">=</span> <span class="n">fileTree</span><span class="o">(</span><span class="s1">&#39;.&#39;</span><span class="o">)</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="4" class="code-highlight-row numbered"><div class="code-highlight-line">      <span class="n">exclude</span> <span class="s1">&#39;build/**&#39;</span>
+</div></div><div data-line="5" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="o">&#x7d;.</span><span class="na">files</span><span class="o">.</span><span class="na">sort</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="6" class="code-highlight-row numbered"><div class="code-highlight-line">      <span class="o">-(</span><span class="n">it</span><span class="o">.</span><span class="na">lastModified</span><span class="o">())</span>
+</div></div><div data-line="7" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="o">&#x7d;.</span><span class="na">first</span><span class="o">().</span><span class="na">lastModified</span><span class="o">()</span>
+</div></div><div data-line="8" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">File</span> <span class="n">newJar</span> <span class="o">=</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="n">archivePath</span><span class="o">.</span><span class="na">parent</span><span class="o">,</span> <span class="s1">&#39;new-&#39;</span> <span class="o">+</span> <span class="n">archiveName</span><span class="o">)</span>
+</div></div><div data-line="9" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">JarOutputStream</span> <span class="n">jos</span> <span class="o">=</span> <span class="k">new</span> <span class="n">JarOutputStream</span><span class="o">(</span><span class="k">new</span> <span class="n">FileOutputStream</span><span class="o">(</span><span class="n">newJar</span><span class="o">))</span>
+</div></div><div data-line="10" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">JarFile</span> <span class="n">jf</span> <span class="o">=</span> <span class="k">new</span> <span class="n">JarFile</span><span class="o">(</span><span class="n">archivePath</span><span class="o">)</span>
+</div></div><div data-line="11" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">jf</span><span class="o">.</span><span class="na">entries</span><span class="o">().</span><span class="na">each</span> <span class="o">&#x7b;</span> <span class="n">entry</span> <span class="o">-&gt;</span>
+</div></div><div data-line="12" class="code-highlight-row numbered"><div class="code-highlight-line">      <span class="n">cloneAndCopyEntry</span><span class="o">(</span><span class="n">jf</span><span class="o">,</span> <span class="n">entry</span><span class="o">,</span> <span class="n">jos</span><span class="o">,</span> <span class="n">ts</span><span class="o">)</span>
+</div></div><div data-line="13" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="o">&#x7d;</span>
+</div></div><div data-line="14" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">jos</span><span class="o">.</span><span class="na">finish</span><span class="o">()</span>
+</div></div><div data-line="15" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">jf</span><span class="o">.</span><span class="na">close</span><span class="o">()</span>
+</div></div><div data-line="16" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="o">&#x7d;</span>
+</div></div><div data-line="17" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="o">&#x7d;</span>
+</div></div><div data-line="18" class="code-highlight-row numbered"><div class="code-highlight-line"> </div></div><div data-line="19" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="kt">void</span> <span class="nf">cloneAndCopyEntry</span><span class="o">(</span><span class="n">JarFile</span> <span class="n">originalFile</span><span class="o">,</span> <span class="n">JarEntry</span> <span class="n">original</span><span class="o">,</span> <span class="n">JarOutputStream</span> <span class="n">jos</span><span class="o">,</span> <span class="kt">long</span> <span class="n">newTimestamp</span><span class="o">)</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="20" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="n">JarEntry</span> <span class="n">clone</span> <span class="o">=</span> <span class="k">new</span> <span class="n">JarEntry</span><span class="o">(</span><span class="n">original</span><span class="o">)</span>
+</div></div><div data-line="21" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="n">clone</span><span class="o">.</span><span class="na">time</span> <span class="o">=</span> <span class="n">newTimestamp</span>
+</div></div><div data-line="22" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="kt">def</span> <span class="n">entryIs</span> <span class="o">=</span> <span class="n">originalFile</span><span class="o">.</span><span class="na">getInputStream</span><span class="o">(</span><span class="n">original</span><span class="o">)</span>
+</div></div><div data-line="23" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="n">jos</span><span class="o">.</span><span class="na">putNextEntry</span><span class="o">(</span><span class="n">clone</span><span class="o">)</span>
+</div></div><div data-line="24" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="n">copyBinaryData</span><span class="o">(</span><span class="n">entryIs</span><span class="o">,</span> <span class="n">jos</span><span class="o">)</span>
+</div></div><div data-line="25" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="o">&#x7d;</span>
+</div></div><div data-line="26" class="code-highlight-row numbered"><div class="code-highlight-line"> </div></div><div data-line="27" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="kt">void</span> <span class="nf">copyBinaryData</span><span class="o">(</span><span class="n">InputStream</span> <span class="n">is</span><span class="o">,</span> <span class="n">JarOutputStream</span> <span class="n">jos</span><span class="o">)</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="28" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="kt">byte</span><span class="o">[]</span> <span class="n">buffer</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="mi">1024</span><span class="o">]</span>
+</div></div><div data-line="29" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="kt">int</span> <span class="n">len</span> <span class="o">=</span> <span class="mi">0</span>
+</div></div><div data-line="30" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="k">while</span><span class="o">((</span><span class="n">len</span> <span class="o">=</span> <span class="n">is</span><span class="o">.</span><span class="na">read</span><span class="o">(</span><span class="n">buffer</span><span class="o">))</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="o">)</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="31" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">jos</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">buffer</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">len</span><span class="o">)</span>
+</div></div><div data-line="32" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="o">&#x7d;</span>
+</div></div><div data-line="33" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="o">&#x7d;</span></div></div></pre></div></figure>
 
 <h2 id="problem-2---jar-magic-extra-byte">Problem 2 - JAR “Magic” Extra Byte</h2>
 
@@ -141,101 +133,93 @@ void copyBinaryData(InputStream is, JarOutputStream jos) {
 
 <p>Curiously, Jar files produced by the Gradle Jar task, do <strong>NOT</strong> have this magic byte. Digging into their code, I found that they use a <code>ZipOutputStream</code> to write out the Jar file which doesn’t have this magic byte code. Using <code>ZipOutputStream</code> and <code>ZipEntry</code> works just as fine and avoids this, so we update the build to do the same:</p>
 
-<pre><code class="language-groovy">jar {
-  doLast {
-    long ts = fileTree('.') {
-      exclude 'build/**'
-    }.files.sort {
-      -(it.lastModified())
-    }.first().lastModified()
-    File newJar = new File(archivePath.parent, 'new-' + archiveName)
-    ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(newJar))
-    JarFile jf = new JarFile(archivePath)
-    jf.entries().each { entry -&gt;
-      cloneAndCopyEntry(jf, entry, zos, ts)
-    }
-    zos.finish()
-    jf.close()
-  }
-}
-
-void cloneAndCopyEntry(JarFile originalFile, JarEntry original, ZipOutputStream zos, long newTimestamp) {
-  ZipEntry clone = new ZipEntry(original)
-  clone.time = newTimestamp
-  def entryIs = originalFile.getInputStream(original)
-  zos.putNextEntry(clone)
-  copyBinaryData(entryIs, zos)
-}
-
-void copyBinaryData(InputStream is, ZipOutputStream zos) {
-  byte[] buffer = new byte[1024]
-  int len = 0
-  while((len = is.read(buffer)) != -1) {
-    zos.write(buffer, 0, len)
-  }
-}
-</code></pre>
+<figure class="code-highlight-figure"><div class="code-highlight"><pre class="code-highlight-pre"><div data-line="1" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="n">jar</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="2" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="n">doLast</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="3" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="kt">long</span> <span class="n">ts</span> <span class="o">=</span> <span class="n">fileTree</span><span class="o">(</span><span class="s1">&#39;.&#39;</span><span class="o">)</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="4" class="code-highlight-row numbered"><div class="code-highlight-line">      <span class="n">exclude</span> <span class="s1">&#39;build/**&#39;</span>
+</div></div><div data-line="5" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="o">&#x7d;.</span><span class="na">files</span><span class="o">.</span><span class="na">sort</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="6" class="code-highlight-row numbered"><div class="code-highlight-line">      <span class="o">-(</span><span class="n">it</span><span class="o">.</span><span class="na">lastModified</span><span class="o">())</span>
+</div></div><div data-line="7" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="o">&#x7d;.</span><span class="na">first</span><span class="o">().</span><span class="na">lastModified</span><span class="o">()</span>
+</div></div><div data-line="8" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">File</span> <span class="n">newJar</span> <span class="o">=</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="n">archivePath</span><span class="o">.</span><span class="na">parent</span><span class="o">,</span> <span class="s1">&#39;new-&#39;</span> <span class="o">+</span> <span class="n">archiveName</span><span class="o">)</span>
+</div></div><div data-line="9" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">ZipOutputStream</span> <span class="n">zos</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ZipOutputStream</span><span class="o">(</span><span class="k">new</span> <span class="n">FileOutputStream</span><span class="o">(</span><span class="n">newJar</span><span class="o">))</span>
+</div></div><div data-line="10" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">JarFile</span> <span class="n">jf</span> <span class="o">=</span> <span class="k">new</span> <span class="n">JarFile</span><span class="o">(</span><span class="n">archivePath</span><span class="o">)</span>
+</div></div><div data-line="11" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">jf</span><span class="o">.</span><span class="na">entries</span><span class="o">().</span><span class="na">each</span> <span class="o">&#x7b;</span> <span class="n">entry</span> <span class="o">-&gt;</span>
+</div></div><div data-line="12" class="code-highlight-row numbered"><div class="code-highlight-line">      <span class="n">cloneAndCopyEntry</span><span class="o">(</span><span class="n">jf</span><span class="o">,</span> <span class="n">entry</span><span class="o">,</span> <span class="n">zos</span><span class="o">,</span> <span class="n">ts</span><span class="o">)</span>
+</div></div><div data-line="13" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="o">&#x7d;</span>
+</div></div><div data-line="14" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">zos</span><span class="o">.</span><span class="na">finish</span><span class="o">()</span>
+</div></div><div data-line="15" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">jf</span><span class="o">.</span><span class="na">close</span><span class="o">()</span>
+</div></div><div data-line="16" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="o">&#x7d;</span>
+</div></div><div data-line="17" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="o">&#x7d;</span>
+</div></div><div data-line="18" class="code-highlight-row numbered"><div class="code-highlight-line"> </div></div><div data-line="19" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="kt">void</span> <span class="nf">cloneAndCopyEntry</span><span class="o">(</span><span class="n">JarFile</span> <span class="n">originalFile</span><span class="o">,</span> <span class="n">JarEntry</span> <span class="n">original</span><span class="o">,</span> <span class="n">ZipOutputStream</span> <span class="n">zos</span><span class="o">,</span> <span class="kt">long</span> <span class="n">newTimestamp</span><span class="o">)</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="20" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="n">ZipEntry</span> <span class="n">clone</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ZipEntry</span><span class="o">(</span><span class="n">original</span><span class="o">)</span>
+</div></div><div data-line="21" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="n">clone</span><span class="o">.</span><span class="na">time</span> <span class="o">=</span> <span class="n">newTimestamp</span>
+</div></div><div data-line="22" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="kt">def</span> <span class="n">entryIs</span> <span class="o">=</span> <span class="n">originalFile</span><span class="o">.</span><span class="na">getInputStream</span><span class="o">(</span><span class="n">original</span><span class="o">)</span>
+</div></div><div data-line="23" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="n">zos</span><span class="o">.</span><span class="na">putNextEntry</span><span class="o">(</span><span class="n">clone</span><span class="o">)</span>
+</div></div><div data-line="24" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="n">copyBinaryData</span><span class="o">(</span><span class="n">entryIs</span><span class="o">,</span> <span class="n">zos</span><span class="o">)</span>
+</div></div><div data-line="25" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="o">&#x7d;</span>
+</div></div><div data-line="26" class="code-highlight-row numbered"><div class="code-highlight-line"> </div></div><div data-line="27" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="kt">void</span> <span class="nf">copyBinaryData</span><span class="o">(</span><span class="n">InputStream</span> <span class="n">is</span><span class="o">,</span> <span class="n">ZipOutputStream</span> <span class="n">zos</span><span class="o">)</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="28" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="kt">byte</span><span class="o">[]</span> <span class="n">buffer</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="mi">1024</span><span class="o">]</span>
+</div></div><div data-line="29" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="kt">int</span> <span class="n">len</span> <span class="o">=</span> <span class="mi">0</span>
+</div></div><div data-line="30" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="k">while</span><span class="o">((</span><span class="n">len</span> <span class="o">=</span> <span class="n">is</span><span class="o">.</span><span class="na">read</span><span class="o">(</span><span class="n">buffer</span><span class="o">))</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="o">)</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="31" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">zos</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">buffer</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">len</span><span class="o">)</span>
+</div></div><div data-line="32" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="o">&#x7d;</span>
+</div></div><div data-line="33" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="o">&#x7d;</span></div></div></pre></div></figure>
 
 <h2 id="problem-3---zip-timestamp-spec">Problem 3 - Zip timestamp spec</h2>
 
 <p>After all this, I still wasn’t getting subsequent builds of the Jar to have matching checksums. I wrote a method that at the end of producing the timestamp adjusted Jar iterated over all the entries and compared all the fields to the original except the time field which I compared to the expected time stamp. Looks like this:</p>
 
-<pre><code class="language-groovy">jar {
-  doLast {
-    long ts = fileTree('.') {
-      exclude 'build/**'
-    }.files.sort {
-      -(it.lastModified())
-    }.first().lastModified()
-    File newJar = new File(archivePath.parent, 'new-' + archiveName)
-    ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(newJar))
-    JarFile jf = new JarFile(archivePath)
-    jf.entries().each { entry -&gt;
-      cloneAndCopyEntry(jf, entry, zos, ts)
-    }
-    zos.finish()
-    jf.close()
-    compareJars(archivePath, newJar, ts)
-  }
-}
-
-void compareJars(File original, File copy, long ts) {
-  def jf = new JarFile(original)
-  def cjf = new JarFile(copy)
-  jf.entries().each { entry -&gt;
-    def centry = cjf.getJarEntry(entry.name)
-    compareEntries(entry, centry, ts)
-  }
-}
-
-void compareEntries(JarEntry entry, JarEntry centry, long ts) {
-  assert entry.name == centry.name
-  assert entry.comment == centry.comment
-  assert entry.compressedSize == centry.compressedSize
-  assert entry.crc == centry.crc
-  assert entry.extra == centry.extra
-  assert entry.method == centry.method
-  assert entry.size == centry.size
-  assert ts == centry.time
-  assert entry.hashCode() == centry.hashCode()
-}
-
-void cloneAndCopyEntry(JarFile originalFile, JarEntry original, ZipOutputStream zos, long newTimestamp) {
-  ZipEntry clone = new ZipEntry(original)
-  clone.time = newTimestamp
-  def entryIs = originalFile.getInputStream(original)
-  zos.putNextEntry(clone)
-  copyBinaryData(entryIs, zos)
-}
-
-void copyBinaryData(InputStream is, ZipOutputStream zos) {
-  byte[] buffer = new byte[1024]
-  int len = 0
-  while((len = is.read(buffer)) != -1) {
-    zos.write(buffer, 0, len)
-  }
-}
-</code></pre>
+<figure class="code-highlight-figure"><div class="code-highlight"><pre class="code-highlight-pre"><div data-line="1" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="n">jar</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="2" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="n">doLast</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="3" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="kt">long</span> <span class="n">ts</span> <span class="o">=</span> <span class="n">fileTree</span><span class="o">(</span><span class="s1">&#39;.&#39;</span><span class="o">)</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="4" class="code-highlight-row numbered"><div class="code-highlight-line">      <span class="n">exclude</span> <span class="s1">&#39;build/**&#39;</span>
+</div></div><div data-line="5" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="o">&#x7d;.</span><span class="na">files</span><span class="o">.</span><span class="na">sort</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="6" class="code-highlight-row numbered"><div class="code-highlight-line">      <span class="o">-(</span><span class="n">it</span><span class="o">.</span><span class="na">lastModified</span><span class="o">())</span>
+</div></div><div data-line="7" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="o">&#x7d;.</span><span class="na">first</span><span class="o">().</span><span class="na">lastModified</span><span class="o">()</span>
+</div></div><div data-line="8" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">File</span> <span class="n">newJar</span> <span class="o">=</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="n">archivePath</span><span class="o">.</span><span class="na">parent</span><span class="o">,</span> <span class="s1">&#39;new-&#39;</span> <span class="o">+</span> <span class="n">archiveName</span><span class="o">)</span>
+</div></div><div data-line="9" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">ZipOutputStream</span> <span class="n">zos</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ZipOutputStream</span><span class="o">(</span><span class="k">new</span> <span class="n">FileOutputStream</span><span class="o">(</span><span class="n">newJar</span><span class="o">))</span>
+</div></div><div data-line="10" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">JarFile</span> <span class="n">jf</span> <span class="o">=</span> <span class="k">new</span> <span class="n">JarFile</span><span class="o">(</span><span class="n">archivePath</span><span class="o">)</span>
+</div></div><div data-line="11" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">jf</span><span class="o">.</span><span class="na">entries</span><span class="o">().</span><span class="na">each</span> <span class="o">&#x7b;</span> <span class="n">entry</span> <span class="o">-&gt;</span>
+</div></div><div data-line="12" class="code-highlight-row numbered"><div class="code-highlight-line">      <span class="n">cloneAndCopyEntry</span><span class="o">(</span><span class="n">jf</span><span class="o">,</span> <span class="n">entry</span><span class="o">,</span> <span class="n">zos</span><span class="o">,</span> <span class="n">ts</span><span class="o">)</span>
+</div></div><div data-line="13" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="o">&#x7d;</span>
+</div></div><div data-line="14" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">zos</span><span class="o">.</span><span class="na">finish</span><span class="o">()</span>
+</div></div><div data-line="15" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">jf</span><span class="o">.</span><span class="na">close</span><span class="o">()</span>
+</div></div><div data-line="16" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">compareJars</span><span class="o">(</span><span class="n">archivePath</span><span class="o">,</span> <span class="n">newJar</span><span class="o">,</span> <span class="n">ts</span><span class="o">)</span>
+</div></div><div data-line="17" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="o">&#x7d;</span>
+</div></div><div data-line="18" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="o">&#x7d;</span>
+</div></div><div data-line="19" class="code-highlight-row numbered"><div class="code-highlight-line"> </div></div><div data-line="20" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="kt">void</span> <span class="nf">compareJars</span><span class="o">(</span><span class="n">File</span> <span class="n">original</span><span class="o">,</span> <span class="n">File</span> <span class="n">copy</span><span class="o">,</span> <span class="kt">long</span> <span class="n">ts</span><span class="o">)</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="21" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="kt">def</span> <span class="n">jf</span> <span class="o">=</span> <span class="k">new</span> <span class="n">JarFile</span><span class="o">(</span><span class="n">original</span><span class="o">)</span>
+</div></div><div data-line="22" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="kt">def</span> <span class="n">cjf</span> <span class="o">=</span> <span class="k">new</span> <span class="n">JarFile</span><span class="o">(</span><span class="n">copy</span><span class="o">)</span>
+</div></div><div data-line="23" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="n">jf</span><span class="o">.</span><span class="na">entries</span><span class="o">().</span><span class="na">each</span> <span class="o">&#x7b;</span> <span class="n">entry</span> <span class="o">-&gt;</span>
+</div></div><div data-line="24" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="kt">def</span> <span class="n">centry</span> <span class="o">=</span> <span class="n">cjf</span><span class="o">.</span><span class="na">getJarEntry</span><span class="o">(</span><span class="n">entry</span><span class="o">.</span><span class="na">name</span><span class="o">)</span>
+</div></div><div data-line="25" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">compareEntries</span><span class="o">(</span><span class="n">entry</span><span class="o">,</span> <span class="n">centry</span><span class="o">,</span> <span class="n">ts</span><span class="o">)</span>
+</div></div><div data-line="26" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="o">&#x7d;</span>
+</div></div><div data-line="27" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="o">&#x7d;</span>
+</div></div><div data-line="28" class="code-highlight-row numbered"><div class="code-highlight-line"> </div></div><div data-line="29" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="kt">void</span> <span class="nf">compareEntries</span><span class="o">(</span><span class="n">JarEntry</span> <span class="n">entry</span><span class="o">,</span> <span class="n">JarEntry</span> <span class="n">centry</span><span class="o">,</span> <span class="kt">long</span> <span class="n">ts</span><span class="o">)</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="30" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="k">assert</span> <span class="n">entry</span><span class="o">.</span><span class="na">name</span> <span class="o">==</span> <span class="n">centry</span><span class="o">.</span><span class="na">name</span>
+</div></div><div data-line="31" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="k">assert</span> <span class="n">entry</span><span class="o">.</span><span class="na">comment</span> <span class="o">==</span> <span class="n">centry</span><span class="o">.</span><span class="na">comment</span>
+</div></div><div data-line="32" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="k">assert</span> <span class="n">entry</span><span class="o">.</span><span class="na">compressedSize</span> <span class="o">==</span> <span class="n">centry</span><span class="o">.</span><span class="na">compressedSize</span>
+</div></div><div data-line="33" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="k">assert</span> <span class="n">entry</span><span class="o">.</span><span class="na">crc</span> <span class="o">==</span> <span class="n">centry</span><span class="o">.</span><span class="na">crc</span>
+</div></div><div data-line="34" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="k">assert</span> <span class="n">entry</span><span class="o">.</span><span class="na">extra</span> <span class="o">==</span> <span class="n">centry</span><span class="o">.</span><span class="na">extra</span>
+</div></div><div data-line="35" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="k">assert</span> <span class="n">entry</span><span class="o">.</span><span class="na">method</span> <span class="o">==</span> <span class="n">centry</span><span class="o">.</span><span class="na">method</span>
+</div></div><div data-line="36" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="k">assert</span> <span class="n">entry</span><span class="o">.</span><span class="na">size</span> <span class="o">==</span> <span class="n">centry</span><span class="o">.</span><span class="na">size</span>
+</div></div><div data-line="37" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="k">assert</span> <span class="n">ts</span> <span class="o">==</span> <span class="n">centry</span><span class="o">.</span><span class="na">time</span>
+</div></div><div data-line="38" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="k">assert</span> <span class="n">entry</span><span class="o">.</span><span class="na">hashCode</span><span class="o">()</span> <span class="o">==</span> <span class="n">centry</span><span class="o">.</span><span class="na">hashCode</span><span class="o">()</span>
+</div></div><div data-line="39" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="o">&#x7d;</span>
+</div></div><div data-line="40" class="code-highlight-row numbered"><div class="code-highlight-line"> </div></div><div data-line="41" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="kt">void</span> <span class="nf">cloneAndCopyEntry</span><span class="o">(</span><span class="n">JarFile</span> <span class="n">originalFile</span><span class="o">,</span> <span class="n">JarEntry</span> <span class="n">original</span><span class="o">,</span> <span class="n">ZipOutputStream</span> <span class="n">zos</span><span class="o">,</span> <span class="kt">long</span> <span class="n">newTimestamp</span><span class="o">)</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="42" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="n">ZipEntry</span> <span class="n">clone</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ZipEntry</span><span class="o">(</span><span class="n">original</span><span class="o">)</span>
+</div></div><div data-line="43" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="n">clone</span><span class="o">.</span><span class="na">time</span> <span class="o">=</span> <span class="n">newTimestamp</span>
+</div></div><div data-line="44" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="kt">def</span> <span class="n">entryIs</span> <span class="o">=</span> <span class="n">originalFile</span><span class="o">.</span><span class="na">getInputStream</span><span class="o">(</span><span class="n">original</span><span class="o">)</span>
+</div></div><div data-line="45" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="n">zos</span><span class="o">.</span><span class="na">putNextEntry</span><span class="o">(</span><span class="n">clone</span><span class="o">)</span>
+</div></div><div data-line="46" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="n">copyBinaryData</span><span class="o">(</span><span class="n">entryIs</span><span class="o">,</span> <span class="n">zos</span><span class="o">)</span>
+</div></div><div data-line="47" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="o">&#x7d;</span>
+</div></div><div data-line="48" class="code-highlight-row numbered"><div class="code-highlight-line"> </div></div><div data-line="49" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="kt">void</span> <span class="nf">copyBinaryData</span><span class="o">(</span><span class="n">InputStream</span> <span class="n">is</span><span class="o">,</span> <span class="n">ZipOutputStream</span> <span class="n">zos</span><span class="o">)</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="50" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="kt">byte</span><span class="o">[]</span> <span class="n">buffer</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="mi">1024</span><span class="o">]</span>
+</div></div><div data-line="51" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="kt">int</span> <span class="n">len</span> <span class="o">=</span> <span class="mi">0</span>
+</div></div><div data-line="52" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="k">while</span><span class="o">((</span><span class="n">len</span> <span class="o">=</span> <span class="n">is</span><span class="o">.</span><span class="na">read</span><span class="o">(</span><span class="n">buffer</span><span class="o">))</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="o">)</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="53" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">zos</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">buffer</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">len</span><span class="o">)</span>
+</div></div><div data-line="54" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="o">&#x7d;</span>
+</div></div><div data-line="55" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="o">&#x7d;</span></div></div></pre></div></figure>
 
 <p>This showed me that some entries still didn’t have the same timestamp. Curiously, they were always off by 1 second (1000 milliseconds in the script). Digging back into the Java source code for <a href="http://grepcode.com/file/repository.grepcode.com/java/root/jdk/openjdk/7-b147/java/util/zip/ZipEntry.java#ZipEntry.setTime%28long%29">ZipEntry</a>, I found it was doing some sort of unix - DOS conversion and was losing the resolution of the time.</p>
 
@@ -247,72 +231,66 @@ void copyBinaryData(InputStream is, ZipOutputStream zos) {
 
 <p>So, we need to mimic this same behavior when producing our new Jar. Basically, we need to convert our timestamp to a resolution of 2 seconds. It looks like this:</p>
 
-<pre><code class="language-groovy">jar {
-  doLast {
-    long ts = fileTree('.') {
-      exclude 'build/**'
-    }.files.sort {
-      -(it.lastModified())
-    }.first().lastModified()
-    File newJar = new File(archivePath.parent, 'new-' + archiveName)
-    ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(newJar))
-    JarFile jf = new JarFile(archivePath)
-    jf.entries().each { entry -&gt;
-      long adjustedTs = convertTimestamp(ts)
-      cloneAndCopyEntry(jf, entry, zos, adjustedTs)
-    }
-    zos.finish()
-    jf.close()
-    compareJars(archivePath, newJar, ts)
-  }
-}
-
-long convertTimestamp(long timestamp) {
-  long seconds = timestamp / 1000
-  if (seconds % 2 != 0) {
-    seconds += 1
-  }
-  return 1000 * seconds
-}
-
-void compareJars(File original, File copy, long ts) {
-  def jf = new JarFile(original)
-  def cjf = new JarFile(copy)
-  long adjustedTs = convertTimestamp(ts)
-  jf.entries().each { entry -&gt;
-    def centry = cjf.getJarEntry(entry.name)
-    compareEntries(entry, centry, adjustedTs)
-  }
-}
-
-void compareEntries(JarEntry entry, JarEntry centry, long ts) {
-  assert entry.name == centry.name
-  assert entry.comment == centry.comment
-  assert entry.compressedSize == centry.compressedSize
-  assert entry.crc == centry.crc
-  assert entry.extra == centry.extra
-  assert entry.method == centry.method
-  assert entry.size == centry.size
-  assert ts == centry.time
-  assert entry.hashCode() == centry.hashCode()
-}
-
-void cloneAndCopyEntry(JarFile originalFile, JarEntry original, ZipOutputStream zos, long newTimestamp) {
-  ZipEntry clone = new ZipEntry(original)
-  clone.time = newTimestamp
-  def entryIs = originalFile.getInputStream(original)
-  zos.putNextEntry(clone)
-  copyBinaryData(entryIs, zos)
-}
-
-void copyBinaryData(InputStream is, ZipOutputStream zos) {
-  byte[] buffer = new byte[1024]
-  int len = 0
-  while((len = is.read(buffer)) != -1) {
-    zos.write(buffer, 0, len)
-  }
-}
-</code></pre>
+<figure class="code-highlight-figure"><div class="code-highlight"><pre class="code-highlight-pre"><div data-line="1" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="n">jar</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="2" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="n">doLast</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="3" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="kt">long</span> <span class="n">ts</span> <span class="o">=</span> <span class="n">fileTree</span><span class="o">(</span><span class="s1">&#39;.&#39;</span><span class="o">)</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="4" class="code-highlight-row numbered"><div class="code-highlight-line">      <span class="n">exclude</span> <span class="s1">&#39;build/**&#39;</span>
+</div></div><div data-line="5" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="o">&#x7d;.</span><span class="na">files</span><span class="o">.</span><span class="na">sort</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="6" class="code-highlight-row numbered"><div class="code-highlight-line">      <span class="o">-(</span><span class="n">it</span><span class="o">.</span><span class="na">lastModified</span><span class="o">())</span>
+</div></div><div data-line="7" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="o">&#x7d;.</span><span class="na">first</span><span class="o">().</span><span class="na">lastModified</span><span class="o">()</span>
+</div></div><div data-line="8" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">File</span> <span class="n">newJar</span> <span class="o">=</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="n">archivePath</span><span class="o">.</span><span class="na">parent</span><span class="o">,</span> <span class="s1">&#39;new-&#39;</span> <span class="o">+</span> <span class="n">archiveName</span><span class="o">)</span>
+</div></div><div data-line="9" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">ZipOutputStream</span> <span class="n">zos</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ZipOutputStream</span><span class="o">(</span><span class="k">new</span> <span class="n">FileOutputStream</span><span class="o">(</span><span class="n">newJar</span><span class="o">))</span>
+</div></div><div data-line="10" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">JarFile</span> <span class="n">jf</span> <span class="o">=</span> <span class="k">new</span> <span class="n">JarFile</span><span class="o">(</span><span class="n">archivePath</span><span class="o">)</span>
+</div></div><div data-line="11" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">jf</span><span class="o">.</span><span class="na">entries</span><span class="o">().</span><span class="na">each</span> <span class="o">&#x7b;</span> <span class="n">entry</span> <span class="o">-&gt;</span>
+</div></div><div data-line="12" class="code-highlight-row numbered"><div class="code-highlight-line">      <span class="kt">long</span> <span class="n">adjustedTs</span> <span class="o">=</span> <span class="n">convertTimestamp</span><span class="o">(</span><span class="n">ts</span><span class="o">)</span>
+</div></div><div data-line="13" class="code-highlight-row numbered"><div class="code-highlight-line">      <span class="n">cloneAndCopyEntry</span><span class="o">(</span><span class="n">jf</span><span class="o">,</span> <span class="n">entry</span><span class="o">,</span> <span class="n">zos</span><span class="o">,</span> <span class="n">adjustedTs</span><span class="o">)</span>
+</div></div><div data-line="14" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="o">&#x7d;</span>
+</div></div><div data-line="15" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">zos</span><span class="o">.</span><span class="na">finish</span><span class="o">()</span>
+</div></div><div data-line="16" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">jf</span><span class="o">.</span><span class="na">close</span><span class="o">()</span>
+</div></div><div data-line="17" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">compareJars</span><span class="o">(</span><span class="n">archivePath</span><span class="o">,</span> <span class="n">newJar</span><span class="o">,</span> <span class="n">ts</span><span class="o">)</span>
+</div></div><div data-line="18" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="o">&#x7d;</span>
+</div></div><div data-line="19" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="o">&#x7d;</span>
+</div></div><div data-line="20" class="code-highlight-row numbered"><div class="code-highlight-line"> </div></div><div data-line="21" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="kt">long</span> <span class="nf">convertTimestamp</span><span class="o">(</span><span class="kt">long</span> <span class="n">timestamp</span><span class="o">)</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="22" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="kt">long</span> <span class="n">seconds</span> <span class="o">=</span> <span class="n">timestamp</span> <span class="o">/</span> <span class="mi">1000</span>
+</div></div><div data-line="23" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="k">if</span> <span class="o">(</span><span class="n">seconds</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="o">)</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="24" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">seconds</span> <span class="o">+=</span> <span class="mi">1</span>
+</div></div><div data-line="25" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="o">&#x7d;</span>
+</div></div><div data-line="26" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="k">return</span> <span class="mi">1000</span> <span class="o">*</span> <span class="n">seconds</span>
+</div></div><div data-line="27" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="o">&#x7d;</span>
+</div></div><div data-line="28" class="code-highlight-row numbered"><div class="code-highlight-line"> </div></div><div data-line="29" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="kt">void</span> <span class="nf">compareJars</span><span class="o">(</span><span class="n">File</span> <span class="n">original</span><span class="o">,</span> <span class="n">File</span> <span class="n">copy</span><span class="o">,</span> <span class="kt">long</span> <span class="n">ts</span><span class="o">)</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="30" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="kt">def</span> <span class="n">jf</span> <span class="o">=</span> <span class="k">new</span> <span class="n">JarFile</span><span class="o">(</span><span class="n">original</span><span class="o">)</span>
+</div></div><div data-line="31" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="kt">def</span> <span class="n">cjf</span> <span class="o">=</span> <span class="k">new</span> <span class="n">JarFile</span><span class="o">(</span><span class="n">copy</span><span class="o">)</span>
+</div></div><div data-line="32" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="kt">long</span> <span class="n">adjustedTs</span> <span class="o">=</span> <span class="n">convertTimestamp</span><span class="o">(</span><span class="n">ts</span><span class="o">)</span>
+</div></div><div data-line="33" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="n">jf</span><span class="o">.</span><span class="na">entries</span><span class="o">().</span><span class="na">each</span> <span class="o">&#x7b;</span> <span class="n">entry</span> <span class="o">-&gt;</span>
+</div></div><div data-line="34" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="kt">def</span> <span class="n">centry</span> <span class="o">=</span> <span class="n">cjf</span><span class="o">.</span><span class="na">getJarEntry</span><span class="o">(</span><span class="n">entry</span><span class="o">.</span><span class="na">name</span><span class="o">)</span>
+</div></div><div data-line="35" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">compareEntries</span><span class="o">(</span><span class="n">entry</span><span class="o">,</span> <span class="n">centry</span><span class="o">,</span> <span class="n">adjustedTs</span><span class="o">)</span>
+</div></div><div data-line="36" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="o">&#x7d;</span>
+</div></div><div data-line="37" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="o">&#x7d;</span>
+</div></div><div data-line="38" class="code-highlight-row numbered"><div class="code-highlight-line"> </div></div><div data-line="39" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="kt">void</span> <span class="nf">compareEntries</span><span class="o">(</span><span class="n">JarEntry</span> <span class="n">entry</span><span class="o">,</span> <span class="n">JarEntry</span> <span class="n">centry</span><span class="o">,</span> <span class="kt">long</span> <span class="n">ts</span><span class="o">)</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="40" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="k">assert</span> <span class="n">entry</span><span class="o">.</span><span class="na">name</span> <span class="o">==</span> <span class="n">centry</span><span class="o">.</span><span class="na">name</span>
+</div></div><div data-line="41" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="k">assert</span> <span class="n">entry</span><span class="o">.</span><span class="na">comment</span> <span class="o">==</span> <span class="n">centry</span><span class="o">.</span><span class="na">comment</span>
+</div></div><div data-line="42" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="k">assert</span> <span class="n">entry</span><span class="o">.</span><span class="na">compressedSize</span> <span class="o">==</span> <span class="n">centry</span><span class="o">.</span><span class="na">compressedSize</span>
+</div></div><div data-line="43" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="k">assert</span> <span class="n">entry</span><span class="o">.</span><span class="na">crc</span> <span class="o">==</span> <span class="n">centry</span><span class="o">.</span><span class="na">crc</span>
+</div></div><div data-line="44" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="k">assert</span> <span class="n">entry</span><span class="o">.</span><span class="na">extra</span> <span class="o">==</span> <span class="n">centry</span><span class="o">.</span><span class="na">extra</span>
+</div></div><div data-line="45" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="k">assert</span> <span class="n">entry</span><span class="o">.</span><span class="na">method</span> <span class="o">==</span> <span class="n">centry</span><span class="o">.</span><span class="na">method</span>
+</div></div><div data-line="46" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="k">assert</span> <span class="n">entry</span><span class="o">.</span><span class="na">size</span> <span class="o">==</span> <span class="n">centry</span><span class="o">.</span><span class="na">size</span>
+</div></div><div data-line="47" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="k">assert</span> <span class="n">ts</span> <span class="o">==</span> <span class="n">centry</span><span class="o">.</span><span class="na">time</span>
+</div></div><div data-line="48" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="k">assert</span> <span class="n">entry</span><span class="o">.</span><span class="na">hashCode</span><span class="o">()</span> <span class="o">==</span> <span class="n">centry</span><span class="o">.</span><span class="na">hashCode</span><span class="o">()</span>
+</div></div><div data-line="49" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="o">&#x7d;</span>
+</div></div><div data-line="50" class="code-highlight-row numbered"><div class="code-highlight-line"> </div></div><div data-line="51" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="kt">void</span> <span class="nf">cloneAndCopyEntry</span><span class="o">(</span><span class="n">JarFile</span> <span class="n">originalFile</span><span class="o">,</span> <span class="n">JarEntry</span> <span class="n">original</span><span class="o">,</span> <span class="n">ZipOutputStream</span> <span class="n">zos</span><span class="o">,</span> <span class="kt">long</span> <span class="n">newTimestamp</span><span class="o">)</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="52" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="n">ZipEntry</span> <span class="n">clone</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ZipEntry</span><span class="o">(</span><span class="n">original</span><span class="o">)</span>
+</div></div><div data-line="53" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="n">clone</span><span class="o">.</span><span class="na">time</span> <span class="o">=</span> <span class="n">newTimestamp</span>
+</div></div><div data-line="54" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="kt">def</span> <span class="n">entryIs</span> <span class="o">=</span> <span class="n">originalFile</span><span class="o">.</span><span class="na">getInputStream</span><span class="o">(</span><span class="n">original</span><span class="o">)</span>
+</div></div><div data-line="55" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="n">zos</span><span class="o">.</span><span class="na">putNextEntry</span><span class="o">(</span><span class="n">clone</span><span class="o">)</span>
+</div></div><div data-line="56" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="n">copyBinaryData</span><span class="o">(</span><span class="n">entryIs</span><span class="o">,</span> <span class="n">zos</span><span class="o">)</span>
+</div></div><div data-line="57" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="o">&#x7d;</span>
+</div></div><div data-line="58" class="code-highlight-row numbered"><div class="code-highlight-line"> </div></div><div data-line="59" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="kt">void</span> <span class="nf">copyBinaryData</span><span class="o">(</span><span class="n">InputStream</span> <span class="n">is</span><span class="o">,</span> <span class="n">ZipOutputStream</span> <span class="n">zos</span><span class="o">)</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="60" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="kt">byte</span><span class="o">[]</span> <span class="n">buffer</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="mi">1024</span><span class="o">]</span>
+</div></div><div data-line="61" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="kt">int</span> <span class="n">len</span> <span class="o">=</span> <span class="mi">0</span>
+</div></div><div data-line="62" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="k">while</span><span class="o">((</span><span class="n">len</span> <span class="o">=</span> <span class="n">is</span><span class="o">.</span><span class="na">read</span><span class="o">(</span><span class="n">buffer</span><span class="o">))</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="o">)</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="63" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">zos</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">buffer</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">len</span><span class="o">)</span>
+</div></div><div data-line="64" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="o">&#x7d;</span>
+</div></div><div data-line="65" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="o">&#x7d;</span></div></div></pre></div></figure>
 
 <h2 id="problem-4---groovy-timestamp-static-field">Problem 4 - Groovy <code>_timestamp</code> static field</h2>
 
@@ -330,76 +308,64 @@ void copyBinaryData(InputStream is, ZipOutputStream zos) {
 
 <p>That’s an interesting field, because there’s nothing like that in my source file:</p>
 
-<pre><code class="language-groovy">package john.app
-
-import john.lib.EchoUtil
-
-class EchoApp {
-
-  public static void main(String[] args) {
-    args.each {
-      EchoUtil.echo(it)
-    }
-  }
-}
-</code></pre>
+<figure class="code-highlight-figure"><div class="code-highlight"><pre class="code-highlight-pre"><div data-line="1" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="kn">package</span> <span class="n">john</span><span class="o">.</span><span class="na">app</span>
+</div></div><div data-line="2" class="code-highlight-row numbered"><div class="code-highlight-line"> </div></div><div data-line="3" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="kn">import</span> <span class="nn">john.lib.EchoUtil</span>
+</div></div><div data-line="4" class="code-highlight-row numbered"><div class="code-highlight-line"> </div></div><div data-line="5" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="kd">class</span> <span class="nc">EchoApp</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="6" class="code-highlight-row numbered"><div class="code-highlight-line"> </div></div><div data-line="7" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="8" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">args</span><span class="o">.</span><span class="na">each</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="9" class="code-highlight-row numbered"><div class="code-highlight-line">      <span class="n">EchoUtil</span><span class="o">.</span><span class="na">echo</span><span class="o">(</span><span class="n">it</span><span class="o">)</span>
+</div></div><div data-line="10" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="o">&#x7d;</span>
+</div></div><div data-line="11" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="o">&#x7d;</span>
+</div></div><div data-line="12" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="o">&#x7d;</span></div></div></pre></div></figure>
 
 <p>Opening the <code>.class</code> file with a Java Decompiler (JD-GUI in this case), we see this for the class:</p>
 
-<pre><code class="language-java">package john.app;
-
-import groovy.lang.Closure;
-import groovy.lang.GroovyObject;
-import groovy.lang.MetaClass;
-import john.lib.EchoUtil;
-import org.codehaus.groovy.runtime.GeneratedClosure;
-import org.codehaus.groovy.runtime.callsite.CallSite;
-
-public class EchoApp
-  implements GroovyObject
-{
-  public EchoApp()
-  {
-    EchoApp this;
-    CallSite[] arrayOfCallSite = $getCallSiteArray();
-    MetaClass localMetaClass = $getStaticMetaClass();
-    this.metaClass = localMetaClass;
-  }
-
-  public static void main(String[] args)
-  {
-    CallSite[] arrayOfCallSite = $getCallSiteArray(); arrayOfCallSite[0].call(args, new _main_closure1(EchoApp.class)); }
-  static { __$swapInit();
-    long l1 = 0L;
-    __timeStamp__239_neverHappen1387493347537 = l1;
-    long l2 = 1387493347537L; }
-  class _main_closure1 extends Closure implements GeneratedClosure { public _main_closure1(Object _thisObject) { super(_thisObject); }
-    public Object doCall(Object it) { CallSite[] arrayOfCallSite = $getCallSiteArray(); return arrayOfCallSite[0].call(EchoUtil.class, it);
-    }
-
-    public Object doCall()
-    {
-      CallSite[] arrayOfCallSite = $getCallSiteArray();
-      return doCall(null);
-    }
-
-    static
-    {
-      __$swapInit();
-    }
-  }
-}
-</code></pre>
+<figure class="code-highlight-figure"><div class="code-highlight"><pre class="code-highlight-pre"><div data-line="1" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="kn">package</span> <span class="n">john</span><span class="o">.</span><span class="na">app</span><span class="o">;</span>
+</div></div><div data-line="2" class="code-highlight-row numbered"><div class="code-highlight-line"> </div></div><div data-line="3" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="kn">import</span> <span class="nn">groovy.lang.Closure</span><span class="o">;</span>
+</div></div><div data-line="4" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="kn">import</span> <span class="nn">groovy.lang.GroovyObject</span><span class="o">;</span>
+</div></div><div data-line="5" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="kn">import</span> <span class="nn">groovy.lang.MetaClass</span><span class="o">;</span>
+</div></div><div data-line="6" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="kn">import</span> <span class="nn">john.lib.EchoUtil</span><span class="o">;</span>
+</div></div><div data-line="7" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="kn">import</span> <span class="nn">org.codehaus.groovy.runtime.GeneratedClosure</span><span class="o">;</span>
+</div></div><div data-line="8" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="kn">import</span> <span class="nn">org.codehaus.groovy.runtime.callsite.CallSite</span><span class="o">;</span>
+</div></div><div data-line="9" class="code-highlight-row numbered"><div class="code-highlight-line"> </div></div><div data-line="10" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">EchoApp</span>
+</div></div><div data-line="11" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="kd">implements</span> <span class="n">GroovyObject</span>
+</div></div><div data-line="12" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="o">&#x7b;</span>
+</div></div><div data-line="13" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="kd">public</span> <span class="nf">EchoApp</span><span class="o">()</span>
+</div></div><div data-line="14" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="o">&#x7b;</span>
+</div></div><div data-line="15" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">EchoApp</span> <span class="k">this</span><span class="o">;</span>
+</div></div><div data-line="16" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">CallSite</span><span class="o">[]</span> <span class="n">arrayOfCallSite</span> <span class="o">=</span> <span class="n">$getCallSiteArray</span><span class="o">();</span>
+</div></div><div data-line="17" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">MetaClass</span> <span class="n">localMetaClass</span> <span class="o">=</span> <span class="n">$getStaticMetaClass</span><span class="o">();</span>
+</div></div><div data-line="18" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="k">this</span><span class="o">.</span><span class="na">metaClass</span> <span class="o">=</span> <span class="n">localMetaClass</span><span class="o">;</span>
+</div></div><div data-line="19" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="o">&#x7d;</span>
+</div></div><div data-line="20" class="code-highlight-row numbered"><div class="code-highlight-line"> </div></div><div data-line="21" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span>
+</div></div><div data-line="22" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="o">&#x7b;</span>
+</div></div><div data-line="23" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">CallSite</span><span class="o">[]</span> <span class="n">arrayOfCallSite</span> <span class="o">=</span> <span class="n">$getCallSiteArray</span><span class="o">();</span> <span class="n">arrayOfCallSite</span><span class="o">[</span><span class="mi">0</span><span class="o">].</span><span class="na">call</span><span class="o">(</span><span class="n">args</span><span class="o">,</span> <span class="k">new</span> <span class="nf">_main_closure1</span><span class="o">(</span><span class="n">EchoApp</span><span class="o">.</span><span class="na">class</span><span class="o">));</span> <span class="o">&#x7d;</span>
+</div></div><div data-line="24" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="kd">static</span> <span class="o">&#x7b;</span> <span class="n">__$swapInit</span><span class="o">();</span>
+</div></div><div data-line="25" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="kt">long</span> <span class="n">l1</span> <span class="o">=</span> <span class="mi">0L</span><span class="o">;</span>
+</div></div><div data-line="26" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">__timeStamp__239_neverHappen1387493347537</span> <span class="o">=</span> <span class="n">l1</span><span class="o">;</span>
+</div></div><div data-line="27" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="kt">long</span> <span class="n">l2</span> <span class="o">=</span> <span class="mi">1387493347537L</span><span class="o">;</span> <span class="o">&#x7d;</span>
+</div></div><div data-line="28" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="kd">class</span> <span class="nc">_main_closure1</span> <span class="kd">extends</span> <span class="n">Closure</span> <span class="kd">implements</span> <span class="n">GeneratedClosure</span> <span class="o">&#x7b;</span> <span class="kd">public</span> <span class="nf">_main_closure1</span><span class="o">(</span><span class="n">Object</span> <span class="n">_thisObject</span><span class="o">)</span> <span class="o">&#x7b;</span> <span class="kd">super</span><span class="o">(</span><span class="n">_thisObject</span><span class="o">);</span> <span class="o">&#x7d;</span>
+</div></div><div data-line="29" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="kd">public</span> <span class="n">Object</span> <span class="nf">doCall</span><span class="o">(</span><span class="n">Object</span> <span class="n">it</span><span class="o">)</span> <span class="o">&#x7b;</span> <span class="n">CallSite</span><span class="o">[]</span> <span class="n">arrayOfCallSite</span> <span class="o">=</span> <span class="n">$getCallSiteArray</span><span class="o">();</span> <span class="k">return</span> <span class="n">arrayOfCallSite</span><span class="o">[</span><span class="mi">0</span><span class="o">].</span><span class="na">call</span><span class="o">(</span><span class="n">EchoUtil</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">it</span><span class="o">);</span>
+</div></div><div data-line="30" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="o">&#x7d;</span>
+</div></div><div data-line="31" class="code-highlight-row numbered"><div class="code-highlight-line"> </div></div><div data-line="32" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="kd">public</span> <span class="n">Object</span> <span class="nf">doCall</span><span class="o">()</span>
+</div></div><div data-line="33" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="o">&#x7b;</span>
+</div></div><div data-line="34" class="code-highlight-row numbered"><div class="code-highlight-line">      <span class="n">CallSite</span><span class="o">[]</span> <span class="n">arrayOfCallSite</span> <span class="o">=</span> <span class="n">$getCallSiteArray</span><span class="o">();</span>
+</div></div><div data-line="35" class="code-highlight-row numbered"><div class="code-highlight-line">      <span class="k">return</span> <span class="nf">doCall</span><span class="o">(</span><span class="kc">null</span><span class="o">);</span>
+</div></div><div data-line="36" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="o">&#x7d;</span>
+</div></div><div data-line="37" class="code-highlight-row numbered"><div class="code-highlight-line"> </div></div><div data-line="38" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="kd">static</span>
+</div></div><div data-line="39" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="o">&#x7b;</span>
+</div></div><div data-line="40" class="code-highlight-row numbered"><div class="code-highlight-line">      <span class="n">__$swapInit</span><span class="o">();</span>
+</div></div><div data-line="41" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="o">&#x7d;</span>
+</div></div><div data-line="42" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="o">&#x7d;</span>
+</div></div><div data-line="43" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="o">&#x7d;</span></div></div></pre></div></figure>
 
 <p>There is in fact a private variable being initialized. Opening the other copy of this class revealed that the name of this variable was changing:</p>
 
-<pre><code>__timeStamp__239_neverHappen1387493347537
-</code></pre>
+<figure class="code-highlight-figure"><div class="code-highlight"><pre class="code-highlight-pre"><div data-line="1" class="code-highlight-row numbered"><div class="code-highlight-line">__timeStamp__239_neverHappen1387493347537</div></div></pre></div></figure>
 
 <p>vs.</p>
 
-<pre><code>__timeStamp__239_neverHappen1387492963633
-</code></pre>
+<figure class="code-highlight-figure"><div class="code-highlight"><pre class="code-highlight-pre"><div data-line="1" class="code-highlight-row numbered"><div class="code-highlight-line">__timeStamp__239_neverHappen1387492963633</div></div></pre></div></figure>
 
 <p>Hmmm. That’s odd. A little more digging lead me to this <a href="https://jira.codehaus.org/browse/GROOVY-6308">Groovy-6308</a> - Timestamps in bytecode prevents baselining of code. The title of this bug is “Timestamps in bytecode prevents baselining of code”. Yup, this seems to be my problem.</p>
 
@@ -472,7 +438,6 @@ public class EchoApp
   </div>
 
 </footer>
-
 
   </body>
 
