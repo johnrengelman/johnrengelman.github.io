@@ -6,8 +6,8 @@
 </description>
     <link>http://imperceptiblethoughts.com/</link>
     <atom:link href="http://imperceptiblethoughts.com/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Mon, 09 Feb 2015 07:30:42 -0600</pubDate>
-    <lastBuildDate>Mon, 09 Feb 2015 07:30:42 -0600</lastBuildDate>
+    <pubDate>Mon, 09 Feb 2015 08:01:06 -0600</pubDate>
+    <lastBuildDate>Mon, 09 Feb 2015 08:01:06 -0600</lastBuildDate>
     <generator>Jekyll v2.5.3</generator>
     
       <item>
@@ -498,9 +498,7 @@ before finally switching the DNS record over, but so far I’m happy.&lt;/p&gt;
     
       <item>
         <title>Creating Self-contained, Executable Jars With Gradle and Shadow</title>
-        <description>&lt;p&gt;I originally posted this over on &lt;a href=&quot;http://www.objectpartners.com&quot;&gt;objectpartners.com&lt;/a&gt; (2013/07/16)&lt;/p&gt;
-
-&lt;p&gt;Deploying Java applications that are not hosted in an application container (such as a WAR or EAR) can be a pain due to classpath dependencies. This is especially true when using a micro-service framework such as Dropwizard. Using Gradle and the Shadow plugin, applications can be packaged up into a single jar and distributed to your production environments with one file.&lt;/p&gt;
+        <description>
 </description>
         <pubDate>Tue, 08 Oct 2013 13:43:54 -0500</pubDate>
         <link>http://imperceptiblethoughts.com/2013/10/08/creating-self-contained-executable-jars-with-gradle-and-shadow.html</link>
@@ -528,9 +526,7 @@ before finally switching the DNS record over, but so far I’m happy.&lt;/p&gt;
     
       <item>
         <title>Profiling Grails Applications With VisualVM</title>
-        <description>&lt;p&gt;I originally posted this over on &lt;a href=&quot;http://www.objectpartnets.com&quot;&gt;objectpartners.com&lt;/a&gt; (2013/01/25)&lt;/p&gt;
-
-&lt;p&gt;Profiling Grails applications can be a real pain due to many reasons: large heap and perm-gen requirements due to Groovy, class reloading, overhead of Grails itself.&lt;/p&gt;
+        <description>
 </description>
         <pubDate>Mon, 25 Mar 2013 08:55:00 -0500</pubDate>
         <link>http://imperceptiblethoughts.com/2013/03/25/profiling-grails-applications-with-visualvm.html</link>
@@ -541,9 +537,7 @@ before finally switching the DNS record over, but so far I’m happy.&lt;/p&gt;
     
       <item>
         <title>Recovering From Merge Errors in Mercurial With Sub-Repositories and Named Branches</title>
-        <description>&lt;p&gt;I originally posted this post over on &lt;a href=&quot;http://www.objectpartners.com&quot;&gt;objectpartners.com&lt;/a&gt;(2013/03/08)&lt;/p&gt;
-
-&lt;p&gt;This client used Mercurial and sub repositories (though they’ve finally changed to Git and Artifactory) to manage their code base and this caused some issues every so often with a team of 20 developers.&lt;/p&gt;
+        <description>
 </description>
         <pubDate>Mon, 25 Mar 2013 08:51:00 -0500</pubDate>
         <link>http://imperceptiblethoughts.com/2013/03/25/recovering-from-merge-errors-in-mercurial-with-sub-repositories-and-named-branches.html</link>
