@@ -17,6 +17,8 @@ kramdown:
 
 gems:
   - jemoji
+  - octopress-codefence
+  - octopress-solarized
 
 google_universal_analytics: UA-321220-4
 google_universal_analytics_cookiedomain: auto

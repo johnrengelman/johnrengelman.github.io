@@ -11,7 +11,7 @@ I got around to doing some testing on this using a simple Gradle project. Very q
 
 The first problem I ran into was actually setting the timestamp value of a Jar Entry. My first attempt looked something like this:
 
-```groovy
+``` groovy
 jar {
   doLast {
     long ts = fileTree('.') {
@@ -32,7 +32,7 @@ Yup. That didn’t work. Jar’s are more or less read-only. So in order to chan
 
 <!-- more -->
 
-```groovy
+``` groovy
 jar {
   doLast {
     long ts = fileTree('.') {
@@ -76,7 +76,7 @@ This Jar MAGIC byte gets added to the first entry in the Jar file. I haven’t b
 
 Curiously, Jar files produced by the Gradle Jar task, do **NOT** have this magic byte. Digging into their code, I found that they use a `ZipOutputStream` to write out the Jar file which doesn’t have this magic byte code. Using `ZipOutputStream` and `ZipEntry` works just as fine and avoids this, so we update the build to do the same:
 
-```groovy
+``` groovy
 jar {
   doLast {
     long ts = fileTree('.') {
@@ -116,7 +116,7 @@ void copyBinaryData(InputStream is, ZipOutputStream zos) {
 
 After all this, I still wasn’t getting subsequent builds of the Jar to have matching checksums. I wrote a method that at the end of producing the timestamp adjusted Jar iterated over all the entries and compared all the fields to the original except the time field which I compared to the expected time stamp. Looks like this:
 
-```groovy
+``` groovy
 jar {
   doLast {
     long ts = fileTree('.') {
@@ -182,7 +182,7 @@ After a call out to the Twitterverse, a friend pointed out that the [Zip Spec](h
 
 So, we need to mimic this same behavior when producing our new Jar. Basically, we need to convert our timestamp to a resolution of 2 seconds. It looks like this:
 
-```groovy
+``` groovy
 jar {
   doLast {
     long ts = fileTree('.') {
@@ -266,7 +266,7 @@ There was a binary difference in the class file produced by subsequent compilati
 
 That’s an interesting field, because there’s nothing like that in my source file:
 
-```groovy
+``` groovy
 package john.app
 
 import john.lib.EchoUtil
@@ -283,7 +283,7 @@ class EchoApp {
 
 Opening the `.class` file with a Java Decompiler (JD-GUI in this case), we see this for the class:
 
-```java
+``` java
 package john.app;
 
 import groovy.lang.Closure;
