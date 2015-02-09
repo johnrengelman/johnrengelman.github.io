@@ -15,10 +15,18 @@ markdown: kramdown
 kramdown:
   input: GFM
 
+exclude:
+  - Gemfile*
+
 gems:
   - jemoji
   - octopress-codefence
   - octopress-solarized
+  - octopress-linkblog
 
 google_universal_analytics: UA-321220-4
 google_universal_analytics_cookiedomain: auto
+
+linkblog:
+  posts:
+    marker: ★

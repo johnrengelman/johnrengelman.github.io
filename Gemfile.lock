@@ -98,6 +98,9 @@ GEM
       octopress-hooks (~> 2.2)
       octopress-include-tag (~> 1.0)
       uglifier (~> 2.5)
+    octopress-linkblog (2.0.0)
+      octopress-hooks (~> 2.1)
+      titlecase
     octopress-solarized (1.0.3)
       octopress-ink (~> 1.0.0.rc)
     octopress-tag-helpers (1.0.2)
@@ -135,4 +138,5 @@ DEPENDENCIES
   jemoji
   octopress (~> 3.0.0.rc)
   octopress-codefence
+  octopress-linkblog
   octopress-solarized

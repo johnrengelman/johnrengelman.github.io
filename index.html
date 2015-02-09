@@ -11,9 +11,15 @@ layout: default
       <li>
         <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span>
 
+        {% if post.linkpost %}
+        <h2>
+          {{ post.title_link }}
+        </h2>
+        {% else %}
         <h2>
           <a class="post-link" href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
         </h2>
+        {% endif %}
       </li>
     {% endfor %}
   </ul>
