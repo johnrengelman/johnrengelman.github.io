@@ -1,0 +1,623 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Imperceptible Thoughts</title>
+    <description>The incoherent, incomprehensible, inconceivable, and incrementally intelligent ramblings of John Engelman
+</description>
+    <link>http://imperceptiblethoughts.com/</link>
+    <atom:link href="http://imperceptiblethoughts.com/feed.xml" rel="self" type="application/rss+xml"/>
+    <pubDate>Sun, 08 Feb 2015 18:11:29 -0600</pubDate>
+    <lastBuildDate>Sun, 08 Feb 2015 18:11:29 -0600</lastBuildDate>
+    <generator>Jekyll v2.5.3</generator>
+    
+      <item>
+        <title>Yet Another Blog Hosting Change</title>
+        <description>&lt;p&gt;Only a few months ago, I decided to switch my personal blog (which isn’t maintained very well)&lt;br /&gt;
+from a privately hosted Wordpress installation on a server in my basement to Tumblr. There&lt;br /&gt;
+were a lot of reasons for this but the biggest was, I’m not very interested in maintaining that&lt;br /&gt;
+server anymore.&lt;/p&gt;
+
+&lt;!-- more --&gt;
+
+&lt;p&gt;Tumblr has ben ok. But I’ve found that, I don’t like any blogging platform where I have to link&lt;br /&gt;
+to an external page to get source code included in the blog post (lame/too much effort). The&lt;br /&gt;
+obvious choice to correct this was to use something based on Markdown so I can write code&lt;br /&gt;
+inline. And that inevitably led me to using Github Pages.&lt;/p&gt;
+
+&lt;p&gt;That’s all well and good, but Github Pages doesn’t provided any type of default scheming, you&lt;br /&gt;
+are responsible for everything. That’s cool if you’re into that kind of stuff, but CSS and&lt;br /&gt;
+skinning has never been a strong suite of mine. So, I needed something with some generic, yet&lt;br /&gt;
+good looking templates. In comes Octopress.&lt;/p&gt;
+
+&lt;p&gt;I’m just starting to learn the ropes here, so I’ll be doing a lot to play with this platform&lt;br /&gt;
+before finally switching the DNS record over, but so far I’m happy.&lt;/p&gt;
+
+&lt;p&gt;More to come!&lt;/p&gt;
+</description>
+        <pubDate>Wed, 05 Feb 2014 00:00:00 -0600</pubDate>
+        <link>http://imperceptiblethoughts.com/2014/02/05/yet-another-blog-hosting-change.html</link>
+        <guid isPermaLink="true">http://imperceptiblethoughts.com/2014/02/05/yet-another-blog-hosting-change.html</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>Grails-Gradle Plugin 2.0.0 Released</title>
+        <description>&lt;p&gt;I am happy to announce that the 2.0.0 release for the Grails-Gradle plugin has finally been released.&lt;/p&gt;
+
+&lt;p&gt;This release has been a long time coming, and offers some significant improvements over the 1.1.0 release. Additionally, many people have been relying on the 2.0.0-SNAPSHOT release and this locks-in a stable version that is now available in Maven Central and the Grails Central repositories.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;ChangeLog&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Automatic configuration of Grails repositories using &lt;code&gt;grails.central()&lt;/code&gt; in your &lt;code&gt;repositories&lt;/code&gt; block&lt;/li&gt;
+  &lt;li&gt;Automatic configuration of Grails, Groovy, and Spring Loaded versions&lt;/li&gt;
+  &lt;li&gt;Implementation of a build task structure more similar to a standard Java project (i.e. clean, build, assemble, test, check ,etc.)&lt;/li&gt;
+  &lt;li&gt;Better integration with IntelliJ IDEA (plugin source is now available)&lt;/li&gt;
+  &lt;li&gt;Definition of Grails source sets to allow for task input/output configuration&lt;/li&gt;
+  &lt;li&gt;Various bug fixes and improvements in Grails command spawning.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Additional information can be found on the plugin’s Github &lt;a href=&quot;https://github.com/grails/grails-gradle-plugin&quot;&gt;page&lt;/a&gt;.&lt;/p&gt;
+</description>
+        <pubDate>Mon, 27 Jan 2014 00:00:00 -0600</pubDate>
+        <link>http://imperceptiblethoughts.com/2014/01/27/grails-gradle-plugin-2-0-0-released.html</link>
+        <guid isPermaLink="true">http://imperceptiblethoughts.com/2014/01/27/grails-gradle-plugin-2-0-0-released.html</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>Reproducible Multi-Project Gradle Builds (Part 2)</title>
+        <description>&lt;p&gt;Follow up to my previous post - &lt;a href=&quot;/2013/12/17/reproducible-multi-project-gradle-builds.html&quot;&gt;Reproducible Multi-Project Gradle builds&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;I got around to doing some testing on this using a simple Gradle project. Very quickly did I find out that this particular strategy was not going to be easy…and potentially impossible.&lt;/p&gt;
+
+&lt;h2 id=&quot;problem-1---setting-timestamp-value-on-jar-entrys&quot;&gt;Problem 1 - Setting Timestamp value on Jar Entry’s&lt;/h2&gt;
+
+&lt;p&gt;The first problem I ran into was actually setting the timestamp value of a Jar Entry. My first attempt looked something like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-groovy&quot;&gt;jar {
+  doLast {
+    long ts = fileTree(&#39;.&#39;) {
+      exclude &#39;build/**&#39;
+    }.files.sort {
+      -(it.lastModified())
+    }.first().lastModified()
+    JarFile jf = new JarFile(archivePath)
+    jf.entries().each { entry -&amp;gt;
+      entry.time = ts
+    }
+    jf.close()
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Yup. That didn’t work. Jar’s are more or less read-only. So in order to change the time stamp, I needed to write out a new Jar file with the modified entries. Basically, create a new jar file, iterate over the entries from the first jar file, clone them, modified the time stamp, add the cloned entry to the new jar file and then binary copy the data from the first jar file to the second. It looks something like this:&lt;/p&gt;
+
+&lt;!-- more --&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-groovy&quot;&gt;jar {
+  doLast {
+    long ts = fileTree(&#39;.&#39;) {
+      exclude &#39;build/**&#39;
+    }.files.sort {
+      -(it.lastModified())
+    }.first().lastModified()
+    File newJar = new File(archivePath.parent, &#39;new-&#39; + archiveName)
+    JarOutputStream jos = new JarOutputStream(new FileOutputStream(newJar))
+    JarFile jf = new JarFile(archivePath)
+    jf.entries().each { entry -&amp;gt;
+      cloneAndCopyEntry(jf, entry, jos, ts)
+    }
+    jos.finish()
+    jf.close()
+  }
+}
+
+void cloneAndCopyEntry(JarFile originalFile, JarEntry original, JarOutputStream jos, long newTimestamp) {
+  JarEntry clone = new JarEntry(original)
+  clone.time = newTimestamp
+  def entryIs = originalFile.getInputStream(original)
+  jos.putNextEntry(clone)
+  copyBinaryData(entryIs, jos)
+}
+
+void copyBinaryData(InputStream is, JarOutputStream jos) {
+  byte[] buffer = new byte[1024]
+  int len = 0
+  while((len = is.read(buffer)) != -1) {
+    jos.write(buffer, 0, len)
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;problem-2---jar-magic-extra-byte&quot;&gt;Problem 2 - JAR “Magic” Extra Byte&lt;/h2&gt;
+
+&lt;p&gt;The next issue I encountered was that my new Jar file always had an entry that didn’t match the original Jar for it’s ‘extra’ property. &lt;code&gt;JarEntry.geExtra()&lt;/code&gt; returns a &lt;code&gt;byte[]&lt;/code&gt;. In the orignal file, this was null, but in my copied file it was set to some data. I finally found that it is from the implementation of &lt;a href=&quot;http://grepcode.com/file/repository.grepcode.com/java/root/jdk/openjdk/7-b147/java/util/jar/JarOutputStream.java&quot;&gt;JarOutputStream&lt;/a&gt; in Java.&lt;/p&gt;
+
+&lt;p&gt;This Jar MAGIC byte gets added to the first entry in the Jar file. I haven’t been able to find any documentation on what it is for, but a friend thought it was likely for the Jar tool itself to determine if an archive file is actually a Jar.&lt;/p&gt;
+
+&lt;p&gt;Curiously, Jar files produced by the Gradle Jar task, do &lt;strong&gt;NOT&lt;/strong&gt; have this magic byte. Digging into their code, I found that they use a &lt;code&gt;ZipOutputStream&lt;/code&gt; to write out the Jar file which doesn’t have this magic byte code. Using &lt;code&gt;ZipOutputStream&lt;/code&gt; and &lt;code&gt;ZipEntry&lt;/code&gt; works just as fine and avoids this, so we update the build to do the same:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-groovy&quot;&gt;jar {
+  doLast {
+    long ts = fileTree(&#39;.&#39;) {
+      exclude &#39;build/**&#39;
+    }.files.sort {
+      -(it.lastModified())
+    }.first().lastModified()
+    File newJar = new File(archivePath.parent, &#39;new-&#39; + archiveName)
+    ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(newJar))
+    JarFile jf = new JarFile(archivePath)
+    jf.entries().each { entry -&amp;gt;
+      cloneAndCopyEntry(jf, entry, zos, ts)
+    }
+    zos.finish()
+    jf.close()
+  }
+}
+
+void cloneAndCopyEntry(JarFile originalFile, JarEntry original, ZipOutputStream zos, long newTimestamp) {
+  ZipEntry clone = new ZipEntry(original)
+  clone.time = newTimestamp
+  def entryIs = originalFile.getInputStream(original)
+  zos.putNextEntry(clone)
+  copyBinaryData(entryIs, zos)
+}
+
+void copyBinaryData(InputStream is, ZipOutputStream zos) {
+  byte[] buffer = new byte[1024]
+  int len = 0
+  while((len = is.read(buffer)) != -1) {
+    zos.write(buffer, 0, len)
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;problem-3---zip-timestamp-spec&quot;&gt;Problem 3 - Zip timestamp spec&lt;/h2&gt;
+
+&lt;p&gt;After all this, I still wasn’t getting subsequent builds of the Jar to have matching checksums. I wrote a method that at the end of producing the timestamp adjusted Jar iterated over all the entries and compared all the fields to the original except the time field which I compared to the expected time stamp. Looks like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-groovy&quot;&gt;jar {
+  doLast {
+    long ts = fileTree(&#39;.&#39;) {
+      exclude &#39;build/**&#39;
+    }.files.sort {
+      -(it.lastModified())
+    }.first().lastModified()
+    File newJar = new File(archivePath.parent, &#39;new-&#39; + archiveName)
+    ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(newJar))
+    JarFile jf = new JarFile(archivePath)
+    jf.entries().each { entry -&amp;gt;
+      cloneAndCopyEntry(jf, entry, zos, ts)
+    }
+    zos.finish()
+    jf.close()
+    compareJars(archivePath, newJar, ts)
+  }
+}
+
+void compareJars(File original, File copy, long ts) {
+  def jf = new JarFile(original)
+  def cjf = new JarFile(copy)
+  jf.entries().each { entry -&amp;gt;
+    def centry = cjf.getJarEntry(entry.name)
+    compareEntries(entry, centry, ts)
+  }
+}
+
+void compareEntries(JarEntry entry, JarEntry centry, long ts) {
+  assert entry.name == centry.name
+  assert entry.comment == centry.comment
+  assert entry.compressedSize == centry.compressedSize
+  assert entry.crc == centry.crc
+  assert entry.extra == centry.extra
+  assert entry.method == centry.method
+  assert entry.size == centry.size
+  assert ts == centry.time
+  assert entry.hashCode() == centry.hashCode()
+}
+
+void cloneAndCopyEntry(JarFile originalFile, JarEntry original, ZipOutputStream zos, long newTimestamp) {
+  ZipEntry clone = new ZipEntry(original)
+  clone.time = newTimestamp
+  def entryIs = originalFile.getInputStream(original)
+  zos.putNextEntry(clone)
+  copyBinaryData(entryIs, zos)
+}
+
+void copyBinaryData(InputStream is, ZipOutputStream zos) {
+  byte[] buffer = new byte[1024]
+  int len = 0
+  while((len = is.read(buffer)) != -1) {
+    zos.write(buffer, 0, len)
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This showed me that some entries still didn’t have the same timestamp. Curiously, they were always off by 1 second (1000 milliseconds in the script). Digging back into the Java source code for &lt;a href=&quot;http://grepcode.com/file/repository.grepcode.com/java/root/jdk/openjdk/7-b147/java/util/zip/ZipEntry.java#ZipEntry.setTime%28long%29&quot;&gt;ZipEntry&lt;/a&gt;, I found it was doing some sort of unix - DOS conversion and was losing the resolution of the time.&lt;/p&gt;
+
+&lt;p&gt;After a call out to the Twitterverse, a friend pointed out that the &lt;a href=&quot;http://ant.apache.org/manual/Tasks/zip.html&quot;&gt;Zip Spec&lt;/a&gt; specifies that Zip entries have a time resolution of 2 seconds:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;The &lt;code&gt;update&lt;/code&gt; parameter controls what happens if the ZIP file already exists. When set to &lt;code&gt;yes&lt;/code&gt;, the ZIP file is updated with the files specified. (New files are added; old files are replaced with the new versions.) When set to &lt;code&gt;no&lt;/code&gt; (the default) the ZIP file is overwritten if any of the files that would be added to the archive are newer than the entries inside the archive. Please note that ZIP files store file modification times with a granularity of two seconds. If a file is less than two seconds newer than the entry in the archive, Apache Ant will not consider it newer.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;So, we need to mimic this same behavior when producing our new Jar. Basically, we need to convert our timestamp to a resolution of 2 seconds. It looks like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-groovy&quot;&gt;jar {
+  doLast {
+    long ts = fileTree(&#39;.&#39;) {
+      exclude &#39;build/**&#39;
+    }.files.sort {
+      -(it.lastModified())
+    }.first().lastModified()
+    File newJar = new File(archivePath.parent, &#39;new-&#39; + archiveName)
+    ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(newJar))
+    JarFile jf = new JarFile(archivePath)
+    jf.entries().each { entry -&amp;gt;
+      long adjustedTs = convertTimestamp(ts)
+      cloneAndCopyEntry(jf, entry, zos, adjustedTs)
+    }
+    zos.finish()
+    jf.close()
+    compareJars(archivePath, newJar, ts)
+  }
+}
+
+long convertTimestamp(long timestamp) {
+  long seconds = timestamp / 1000
+  if (seconds % 2 != 0) {
+    seconds += 1
+  }
+  return 1000 * seconds
+}
+
+void compareJars(File original, File copy, long ts) {
+  def jf = new JarFile(original)
+  def cjf = new JarFile(copy)
+  long adjustedTs = convertTimestamp(ts)
+  jf.entries().each { entry -&amp;gt;
+    def centry = cjf.getJarEntry(entry.name)
+    compareEntries(entry, centry, adjustedTs)
+  }
+}
+
+void compareEntries(JarEntry entry, JarEntry centry, long ts) {
+  assert entry.name == centry.name
+  assert entry.comment == centry.comment
+  assert entry.compressedSize == centry.compressedSize
+  assert entry.crc == centry.crc
+  assert entry.extra == centry.extra
+  assert entry.method == centry.method
+  assert entry.size == centry.size
+  assert ts == centry.time
+  assert entry.hashCode() == centry.hashCode()
+}
+
+void cloneAndCopyEntry(JarFile originalFile, JarEntry original, ZipOutputStream zos, long newTimestamp) {
+  ZipEntry clone = new ZipEntry(original)
+  clone.time = newTimestamp
+  def entryIs = originalFile.getInputStream(original)
+  zos.putNextEntry(clone)
+  copyBinaryData(entryIs, zos)
+}
+
+void copyBinaryData(InputStream is, ZipOutputStream zos) {
+  byte[] buffer = new byte[1024]
+  int len = 0
+  while((len = is.read(buffer)) != -1) {
+    zos.write(buffer, 0, len)
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;problem-4---groovy-timestamp-static-field&quot;&gt;Problem 4 - Groovy &lt;code&gt;_timestamp&lt;/code&gt; static field&lt;/h2&gt;
+
+&lt;p&gt;This got my Jars closer, but they still weren’t checksumming the same. At this point, I started using a hex viewer to compare the two files. I used &lt;a href=&quot;http://ridiculousfish.com/hexfiend/&quot;&gt;Hex Fiend&lt;/a&gt; because it can do a side by side diff of files and is free&lt;/p&gt;
+
+&lt;p&gt;Using a Hex viewer on a Jar file doesn’t do much since the data is compressed, but it can get you pointed in the right direction. In my cause I could see some byte differences around what appeared to be some class declarations&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/hex1.png&quot; alt=&quot;Hex View 1&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Next step was to explode the Jars and compare each of the files. This should a pretty apparent difference&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/hex2.png&quot; alt=&quot;Hex View 2&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;There was a binary difference in the class file produced by subsequent compilations. The difference was related to a filed named &lt;code&gt;__timestamp_239_neverHappen1387492963633&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;That’s an interesting field, because there’s nothing like that in my source file:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-groovy&quot;&gt;package john.app
+
+import john.lib.EchoUtil
+
+class EchoApp {
+
+  public static void main(String[] args) {
+    args.each {
+      EchoUtil.echo(it)
+    }
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Opening the &lt;code&gt;.class&lt;/code&gt; file with a Java Decompiler (JD-GUI in this case), we see this for the class:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-java&quot;&gt;package john.app;
+
+import groovy.lang.Closure;
+import groovy.lang.GroovyObject;
+import groovy.lang.MetaClass;
+import john.lib.EchoUtil;
+import org.codehaus.groovy.runtime.GeneratedClosure;
+import org.codehaus.groovy.runtime.callsite.CallSite;
+
+public class EchoApp
+  implements GroovyObject
+{
+  public EchoApp()
+  {
+    EchoApp this;
+    CallSite[] arrayOfCallSite = $getCallSiteArray();
+    MetaClass localMetaClass = $getStaticMetaClass();
+    this.metaClass = localMetaClass;
+  }
+
+  public static void main(String[] args)
+  {
+    CallSite[] arrayOfCallSite = $getCallSiteArray(); arrayOfCallSite[0].call(args, new _main_closure1(EchoApp.class)); }
+  static { __$swapInit();
+    long l1 = 0L;
+    __timeStamp__239_neverHappen1387493347537 = l1;
+    long l2 = 1387493347537L; }
+  class _main_closure1 extends Closure implements GeneratedClosure { public _main_closure1(Object _thisObject) { super(_thisObject); }
+    public Object doCall(Object it) { CallSite[] arrayOfCallSite = $getCallSiteArray(); return arrayOfCallSite[0].call(EchoUtil.class, it);
+    }
+
+    public Object doCall()
+    {
+      CallSite[] arrayOfCallSite = $getCallSiteArray();
+      return doCall(null);
+    }
+
+    static
+    {
+      __$swapInit();
+    }
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;There is in fact a private variable being initialized. Opening the other copy of this class revealed that the name of this variable was changing:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;__timeStamp__239_neverHappen1387493347537
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;vs.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;__timeStamp__239_neverHappen1387492963633
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Hmmm. That’s odd. A little more digging lead me to this &lt;a href=&quot;https://jira.codehaus.org/browse/GROOVY-6308&quot;&gt;Groovy-6308&lt;/a&gt; - Timestamps in bytecode prevents baselining of code. The title of this bug is “Timestamps in bytecode prevents baselining of code”. Yup, this seems to be my problem.&lt;/p&gt;
+
+&lt;p&gt;It appears this field is injected as some sort of addition to &lt;code&gt;SerialVersionUUID&lt;/code&gt;, though the corresponding conversations of that bug and the related bugs seems to indicate that it’s not really used for anything.&lt;/p&gt;
+
+&lt;p&gt;Unfortunately, the bugs are listed as being targeted for Groovy 3.0 which doesn’t help me in the near term.&lt;/p&gt;
+
+&lt;p&gt;At this point, since it’s a compiler function that’s stopping me, I’m not sure I have a path forward. This will probably get back burnered for a while since it’s not critical and more of a thought experiment than anything.&lt;/p&gt;
+</description>
+        <pubDate>Fri, 20 Dec 2013 00:00:00 -0600</pubDate>
+        <link>http://imperceptiblethoughts.com/2013/12/20/reproducible-multi-project-gradle-builds-part-2.html</link>
+        <guid isPermaLink="true">http://imperceptiblethoughts.com/2013/12/20/reproducible-multi-project-gradle-builds-part-2.html</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>Reproducible Multi-Project Gradle Builds</title>
+        <description>&lt;p&gt;Lately I’ve been working on a way to create a reproducible build of my application source using Gradle. And by reproducible, I mean, when I run the md5 or sha256 checksum on the resulting files, I get the same results.&lt;/p&gt;
+
+&lt;p&gt;This is a bit more complicate then I originally thought. The issue is that inherently, a Java Jar file includes the timestamp information for the files contained within. So, if you build a Jar and checksum it and then clean and rebuilt the Jar, even though the files are semantically identical, the resulting checksum’s will be different.&lt;/p&gt;
+
+&lt;p&gt;This is a problem in Continuous Integration/Deployment environments where you may be building from a clean VCS checkout every time but want to know only about the things that changed.&lt;/p&gt;
+
+&lt;!-- more --&gt;
+
+&lt;p&gt;Working around this in Gradle is a bit of mind twister. After thinking about this for a couple days, I’ve come up with this list of items that need to addressed to successfully accomplish what I’m trying to do.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Calculate a single timestamp for each artifact that Gradle produces&lt;/li&gt;
+  &lt;li&gt;Timestamp calculation needs to be sensitive to the Gradle project that produces the artifact.&lt;/li&gt;
+  &lt;li&gt;Timestamp calculation needs to be sensitive to any Gradle project dependencies for the project producing the artifact.&lt;/li&gt;
+  &lt;li&gt;Modify the resulting artifact to set the timestamp information for contents uniformly.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;After a quick Twitter conversation with &lt;a href=&quot;http://twitter.com/ldaley&quot;&gt;Luke Daley&lt;/a&gt;, item 4 was knocked out by using Java’s &lt;code&gt;ZipFile&lt;/code&gt; API to iterate over the jar’s contents and set the &lt;code&gt;lastModified&lt;/code&gt; timestamp to a value, but that leaves the more critical timestamp calculations.&lt;/p&gt;
+
+&lt;p&gt;Let’s start with a mind experiment to figure out what we need. Let’s assume we have the following Gradle project structure:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;myApp
+  |- utils
+  |- app
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This is a simple Gradle multi-project build where we have the application as one project and a utility library as another.&lt;/p&gt;
+
+&lt;p&gt;We check this code out and run a &lt;code&gt;./gradlew build&lt;/code&gt; and calculate an MD5 checksum on &lt;code&gt;utils.jar&lt;/code&gt; and &lt;code&gt;app.jar&lt;/code&gt;:&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;File&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;Checksum&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;utils.jar&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;A&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;app.jar&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;B&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;If I make a change to the &lt;code&gt;app&lt;/code&gt; project and do a &lt;code&gt;./gradlew clean build&lt;/code&gt;, we want the following to happen:&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;File&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;Checksum&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;utils.jar&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;A&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;app.jar&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;B’&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;In this scenario, only the &lt;code&gt;app.jar&lt;/code&gt; checksum would change because the &lt;code&gt;utils&lt;/code&gt; project is functionally equivalent.&lt;/p&gt;
+
+&lt;p&gt;However, if we start from our initial commit and change the &lt;code&gt;utils&lt;/code&gt; project and do a &lt;code&gt;./gradlew clean build&lt;/code&gt;, we want the following to happen:&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;File&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;Checksum&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;utils.jar&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;A’&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;app.jar&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;B’&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;In this case with only a change to &lt;code&gt;utils&lt;/code&gt;, we want both checksums to change because the &lt;code&gt;app&lt;/code&gt; project is dependent upon the changed code in the utils library.&lt;/p&gt;
+
+&lt;p&gt;My initial thought was to use my VCS to get a timestamp for the latest change to the Gradle project being built. This would couple my build to the VCS being used, but that’s an okay dependency in my opinion. Alternatively, the build could scan over the source contents and get the latest &lt;code&gt;lastModified&lt;/code&gt; timestamp of any file contained within.&lt;/p&gt;
+
+&lt;p&gt;Neither of these solutions would solve the issue with upstream libraries however. Somehow, we need to propagate the upstream project’s information.&lt;/p&gt;
+
+&lt;p&gt;I’m not sure there is a &lt;em&gt;nice&lt;/em&gt; way to do this, but my current thinking is to simulate this meta information by enforcing a commit to downstream projects when an upstream is modified. In my particular case, I would likely change the project’s version of the upstream library by modifying the &lt;code&gt;build.gradle&lt;/code&gt; file in that project. I could add a task that verifies that the downstream project has a version that is &lt;em&gt;at least&lt;/em&gt; equivalent to any upstream projects’ versions. This could run as part of the standard build process. This would force a change to the downstream’s &lt;code&gt;build.gradle&lt;/code&gt; thus indirectly updating the timestamp the VCS would report for that project.&lt;/p&gt;
+
+&lt;p&gt;All of this is theoretical at this point, I’ve only started working on an implementation. I’ll update this post as I learn more.&lt;/p&gt;
+</description>
+        <pubDate>Tue, 17 Dec 2013 00:00:00 -0600</pubDate>
+        <link>http://imperceptiblethoughts.com/2013/12/17/reproducible-multi-project-gradle-builds.html</link>
+        <guid isPermaLink="true">http://imperceptiblethoughts.com/2013/12/17/reproducible-multi-project-gradle-builds.html</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>Creating Self-contained, Executable Jars With Gradle and Shadow</title>
+        <description>&lt;p&gt;I originally posted this over on &lt;a href=&quot;http://www.objectpartners.com&quot;&gt;objectpartners.com&lt;/a&gt; (2013/07/16)&lt;/p&gt;
+
+&lt;p&gt;Deploying Java applications that are not hosted in an application container (such as a WAR or EAR) can be a pain due to classpath dependencies. This is especially true when using a micro-service framework such as Dropwizard. Using Gradle and the Shadow plugin, applications can be packaged up into a single jar and distributed to your production environments with one file.&lt;/p&gt;
+</description>
+        <pubDate>Tue, 08 Oct 2013 13:43:54 -0500</pubDate>
+        <link>http://imperceptiblethoughts.com/2013/10/08/creating-self-contained-executable-jars-with-gradle-and-shadow.html</link>
+        <guid isPermaLink="true">http://imperceptiblethoughts.com/2013/10/08/creating-self-contained-executable-jars-with-gradle-and-shadow.html</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>Change of Heart...</title>
+        <description>&lt;p&gt;As I was adding a new post today, I noticed an old post of mine that I had migrated from my old blog to this one about using IntelliJ and comparing it with STS. It’s a little over 2 years old and in it I make the statement “STS which is based on Eclipse, which I consider to be the premier Java IDE”;.&lt;/p&gt;
+
+&lt;p&gt;At the time, I was just starting my new job after 7 years with a large company where I primarily used Eclipse as my development tool on vanilla Java projects. And though I did really Eclipse at the time and was frustrated for quite a while with IntelliJ’s performance, I have to clarify that it’s is not my stance anymore.&lt;/p&gt;
+
+&lt;p&gt;Here’s the thing, I haven’t used Eclipse or STS for more than ~3mins in the last 2 1/2 years, so I cannot personally attest to its performance or usability. However, in the last 2 1/2 years, IntelliJ (I started with version 9 and am now using the 13 EAP) has come a long way. it’s performance is dramatically better. I’m faster using it now and I love the improvements with respect to Gradle integration they’ve been bringing in.&lt;/p&gt;
+
+&lt;p&gt;I’m not going to promote one over the other like I said because I don’t have enough usage of Eclipse recently to make a comparison and don’t really have the time or desire to look at it any time soon. So I’ll just leave it at that.&lt;/p&gt;
+</description>
+        <pubDate>Tue, 08 Oct 2013 00:00:00 -0500</pubDate>
+        <link>http://imperceptiblethoughts.com/2013/10/08/change-of-heart.html</link>
+        <guid isPermaLink="true">http://imperceptiblethoughts.com/2013/10/08/change-of-heart.html</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>Profiling Grails Applications With VisualVM</title>
+        <description>&lt;p&gt;I originally posted this over on &lt;a href=&quot;http://www.objectpartnets.com&quot;&gt;objectpartners.com&lt;/a&gt; (2013/01/25)&lt;/p&gt;
+
+&lt;p&gt;Profiling Grails applications can be a real pain due to many reasons: large heap and perm-gen requirements due to Groovy, class reloading, overhead of Grails itself.&lt;/p&gt;
+</description>
+        <pubDate>Mon, 25 Mar 2013 08:55:00 -0500</pubDate>
+        <link>http://imperceptiblethoughts.com/2013/03/25/profiling-grails-applications-with-visualvm.html</link>
+        <guid isPermaLink="true">http://imperceptiblethoughts.com/2013/03/25/profiling-grails-applications-with-visualvm.html</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>Recovering From Merge Errors in Mercurial With Sub-Repositories and Named Branches</title>
+        <description>&lt;p&gt;I originally posted this post over on &lt;a href=&quot;http://www.objectpartners.com&quot;&gt;objectpartners.com&lt;/a&gt;(2013/03/08)&lt;/p&gt;
+
+&lt;p&gt;This client used Mercurial and sub repositories (though they’ve finally changed to Git and Artifactory) to manage their code base and this caused some issues every so often with a team of 20 developers.&lt;/p&gt;
+</description>
+        <pubDate>Mon, 25 Mar 2013 08:51:00 -0500</pubDate>
+        <link>http://imperceptiblethoughts.com/2013/03/25/recovering-from-merge-errors-in-mercurial-with-sub-repositories-and-named-branches.html</link>
+        <guid isPermaLink="true">http://imperceptiblethoughts.com/2013/03/25/recovering-from-merge-errors-in-mercurial-with-sub-repositories-and-named-branches.html</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>New Blog. Hooray</title>
+        <description>&lt;p&gt;So I’ve decided to switch my blog over from a Wordpress sited hosted on a server in my basement to Tumblr. I don’t blog that much, but I want to do more and I don’t really want the responsibility of maintaining the server. Also, I want to keep my technical posts and my more mundane posts separate.&lt;/p&gt;
+
+&lt;p&gt;I’m going to republish some old posts of mine to this blog. I’m also going to republish some blog posts from my &lt;a href=&quot;http://www.objectpartners.com&quot;&gt;Object Partners&lt;/a&gt; blog here as well.&lt;/p&gt;
+</description>
+        <pubDate>Mon, 25 Mar 2013 08:32:00 -0500</pubDate>
+        <link>http://imperceptiblethoughts.com/2013/03/25/new-blog-hooray.html</link>
+        <guid isPermaLink="true">http://imperceptiblethoughts.com/2013/03/25/new-blog-hooray.html</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>Contributing to Grails-Core With IntelliJ IDEA 11</title>
+        <description>&lt;p&gt;I’ve recently started to work on contributing patches to the Grails Framework project. I’ve been lucky enough to be working for a client that is ok with using the latest versions of Grails for its back-end applications, so I’ve been able to play around a lot with Grails 2.0.0 since it’s release at the end of last year. However, this has resulted in me encountering a number of unexpected/irritating bugs that have sometimes prevented code from being migrated “as-is”. So, I’ve decided to try and learn and contribute back by working on some bugs myself.&lt;/p&gt;
+
+&lt;p&gt;If you’re looking to contribute yourself, start here &lt;a href=&quot;http://grails.org/Contribute.&quot;&gt;http://grails.org/Contribute.&lt;/a&gt; I didn’t have any issues getting up and running with my own fork of grails-core. I did have to execute a &lt;code&gt;./gradlew compile&lt;/code&gt; task though before I was able to get any test to execute…and don’t worry, when this takes a while. There are &lt;strong&gt;A LOT&lt;/strong&gt; of dependencies to download.&lt;/p&gt;
+
+&lt;p&gt;My next step was to start using IntelliJ 11 since it would allow me to quickly debug failing tests, so I again returned to the grails.org website and found the executing the &lt;code&gt;./gradlew idea&lt;/code&gt; task will produce the necessary IntelliJ project files…Excellent. But this is where the problems started.&lt;/p&gt;
+
+&lt;p&gt;First, I had to open the Module Settings for &lt;code&gt;grails-script&lt;/code&gt; and remove the entry under ‘Source Folders’. This was causing IntelliJ to not save any edits I made to the module properties. It appears that this entry isn’t needed anyway (and I haven’t run into any issues with it yet).&lt;/p&gt;
+
+&lt;p&gt;Second, the project wouldn’t compile because the following 2 classes couldn’t be found:&lt;code&gt;com.springsource.loaded.ReloadEventProcessorPlugin&lt;/code&gt; and &lt;code&gt;com.springsource.loaded.Plugins&lt;/code&gt;. After some searching, I found the &lt;code&gt;springloaded-core-1.0.2.jar&lt;/code&gt; in my Gradle User Home (&lt;code&gt;~/.gradle&lt;/code&gt;) directory (look under &lt;code&gt;~/.gradle/caches/artifacts-7&lt;/code&gt;, it maybe be something different then &lt;code&gt;artifact-7&lt;/code&gt;). I copied this jar to my home directory, opened the Module Settings for &lt;code&gt;grails-core-grails-core&lt;/code&gt; and added a Jar Dependency that pointed to the &lt;code&gt;springloaded-core-1.0.2.jar&lt;/code&gt; in my home directory.&lt;/p&gt;
+
+&lt;p&gt;Third, the &lt;code&gt;grails-plugin-validation&lt;/code&gt; module won’t compile because it was missing a dependency to the &lt;code&gt;grails-web&lt;/code&gt; module. Again, I opened the Module Settings for &lt;code&gt;grails-plugin-validation&lt;/code&gt; and added a Module Dependency to &lt;code&gt;grails-web&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Now, I can finally run and debug my tests and get working on some patches.&lt;/p&gt;
+</description>
+        <pubDate>Mon, 16 Jan 2012 00:00:00 -0600</pubDate>
+        <link>http://imperceptiblethoughts.com/2012/01/16/contributing-to-grails-core-with-intellij-idea-11.html</link>
+        <guid isPermaLink="true">http://imperceptiblethoughts.com/2012/01/16/contributing-to-grails-core-with-intellij-idea-11.html</guid>
+        
+        
+      </item>
+    
+  </channel>
+</rss>

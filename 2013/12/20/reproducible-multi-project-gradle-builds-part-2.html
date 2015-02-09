@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Reproducible Multi-Project Gradle Builds (Part 2)</title>
+  <meta name="description" content="Follow up to my previous post - Reproducible Multi-Project Gradle builds">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="http://imperceptiblethoughts.com/2013/12/20/reproducible-multi-project-gradle-builds-part-2.html">
+  <link rel="alternate" type="application/rss+xml" title="Imperceptible Thoughts" href="http://imperceptiblethoughts.com/feed.xml" />
+  
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-321220-4', 'auto');
+    ga('send', 'pageview');
+  </script>
+
+
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Imperceptible Thoughts</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Reproducible Multi-Project Gradle Builds (Part 2)</h1>
+    <p class="post-meta">Dec 20, 2013</p>
+  </header>
+
+  <article class="post-content">
+    <p>Follow up to my previous post - <a href="/2013/12/17/reproducible-multi-project-gradle-builds.html">Reproducible Multi-Project Gradle builds</a></p>
+
+<p>I got around to doing some testing on this using a simple Gradle project. Very quickly did I find out that this particular strategy was not going to be easy…and potentially impossible.</p>
+
+<h2 id="problem-1---setting-timestamp-value-on-jar-entrys">Problem 1 - Setting Timestamp value on Jar Entry’s</h2>
+
+<p>The first problem I ran into was actually setting the timestamp value of a Jar Entry. My first attempt looked something like this:</p>
+
+<pre><code class="language-groovy">jar {
+  doLast {
+    long ts = fileTree('.') {
+      exclude 'build/**'
+    }.files.sort {
+      -(it.lastModified())
+    }.first().lastModified()
+    JarFile jf = new JarFile(archivePath)
+    jf.entries().each { entry -&gt;
+      entry.time = ts
+    }
+    jf.close()
+  }
+}
+</code></pre>
+
+<p>Yup. That didn’t work. Jar’s are more or less read-only. So in order to change the time stamp, I needed to write out a new Jar file with the modified entries. Basically, create a new jar file, iterate over the entries from the first jar file, clone them, modified the time stamp, add the cloned entry to the new jar file and then binary copy the data from the first jar file to the second. It looks something like this:</p>
+
+<!-- more -->
+
+<pre><code class="language-groovy">jar {
+  doLast {
+    long ts = fileTree('.') {
+      exclude 'build/**'
+    }.files.sort {
+      -(it.lastModified())
+    }.first().lastModified()
+    File newJar = new File(archivePath.parent, 'new-' + archiveName)
+    JarOutputStream jos = new JarOutputStream(new FileOutputStream(newJar))
+    JarFile jf = new JarFile(archivePath)
+    jf.entries().each { entry -&gt;
+      cloneAndCopyEntry(jf, entry, jos, ts)
+    }
+    jos.finish()
+    jf.close()
+  }
+}
+
+void cloneAndCopyEntry(JarFile originalFile, JarEntry original, JarOutputStream jos, long newTimestamp) {
+  JarEntry clone = new JarEntry(original)
+  clone.time = newTimestamp
+  def entryIs = originalFile.getInputStream(original)
+  jos.putNextEntry(clone)
+  copyBinaryData(entryIs, jos)
+}
+
+void copyBinaryData(InputStream is, JarOutputStream jos) {
+  byte[] buffer = new byte[1024]
+  int len = 0
+  while((len = is.read(buffer)) != -1) {
+    jos.write(buffer, 0, len)
+  }
+}
+</code></pre>
+
+<h2 id="problem-2---jar-magic-extra-byte">Problem 2 - JAR “Magic” Extra Byte</h2>
+
+<p>The next issue I encountered was that my new Jar file always had an entry that didn’t match the original Jar for it’s ‘extra’ property. <code>JarEntry.geExtra()</code> returns a <code>byte[]</code>. In the orignal file, this was null, but in my copied file it was set to some data. I finally found that it is from the implementation of <a href="http://grepcode.com/file/repository.grepcode.com/java/root/jdk/openjdk/7-b147/java/util/jar/JarOutputStream.java">JarOutputStream</a> in Java.</p>
+
+<p>This Jar MAGIC byte gets added to the first entry in the Jar file. I haven’t been able to find any documentation on what it is for, but a friend thought it was likely for the Jar tool itself to determine if an archive file is actually a Jar.</p>
+
+<p>Curiously, Jar files produced by the Gradle Jar task, do <strong>NOT</strong> have this magic byte. Digging into their code, I found that they use a <code>ZipOutputStream</code> to write out the Jar file which doesn’t have this magic byte code. Using <code>ZipOutputStream</code> and <code>ZipEntry</code> works just as fine and avoids this, so we update the build to do the same:</p>
+
+<pre><code class="language-groovy">jar {
+  doLast {
+    long ts = fileTree('.') {
+      exclude 'build/**'
+    }.files.sort {
+      -(it.lastModified())
+    }.first().lastModified()
+    File newJar = new File(archivePath.parent, 'new-' + archiveName)
+    ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(newJar))
+    JarFile jf = new JarFile(archivePath)
+    jf.entries().each { entry -&gt;
+      cloneAndCopyEntry(jf, entry, zos, ts)
+    }
+    zos.finish()
+    jf.close()
+  }
+}
+
+void cloneAndCopyEntry(JarFile originalFile, JarEntry original, ZipOutputStream zos, long newTimestamp) {
+  ZipEntry clone = new ZipEntry(original)
+  clone.time = newTimestamp
+  def entryIs = originalFile.getInputStream(original)
+  zos.putNextEntry(clone)
+  copyBinaryData(entryIs, zos)
+}
+
+void copyBinaryData(InputStream is, ZipOutputStream zos) {
+  byte[] buffer = new byte[1024]
+  int len = 0
+  while((len = is.read(buffer)) != -1) {
+    zos.write(buffer, 0, len)
+  }
+}
+</code></pre>
+
+<h2 id="problem-3---zip-timestamp-spec">Problem 3 - Zip timestamp spec</h2>
+
+<p>After all this, I still wasn’t getting subsequent builds of the Jar to have matching checksums. I wrote a method that at the end of producing the timestamp adjusted Jar iterated over all the entries and compared all the fields to the original except the time field which I compared to the expected time stamp. Looks like this:</p>
+
+<pre><code class="language-groovy">jar {
+  doLast {
+    long ts = fileTree('.') {
+      exclude 'build/**'
+    }.files.sort {
+      -(it.lastModified())
+    }.first().lastModified()
+    File newJar = new File(archivePath.parent, 'new-' + archiveName)
+    ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(newJar))
+    JarFile jf = new JarFile(archivePath)
+    jf.entries().each { entry -&gt;
+      cloneAndCopyEntry(jf, entry, zos, ts)
+    }
+    zos.finish()
+    jf.close()
+    compareJars(archivePath, newJar, ts)
+  }
+}
+
+void compareJars(File original, File copy, long ts) {
+  def jf = new JarFile(original)
+  def cjf = new JarFile(copy)
+  jf.entries().each { entry -&gt;
+    def centry = cjf.getJarEntry(entry.name)
+    compareEntries(entry, centry, ts)
+  }
+}
+
+void compareEntries(JarEntry entry, JarEntry centry, long ts) {
+  assert entry.name == centry.name
+  assert entry.comment == centry.comment
+  assert entry.compressedSize == centry.compressedSize
+  assert entry.crc == centry.crc
+  assert entry.extra == centry.extra
+  assert entry.method == centry.method
+  assert entry.size == centry.size
+  assert ts == centry.time
+  assert entry.hashCode() == centry.hashCode()
+}
+
+void cloneAndCopyEntry(JarFile originalFile, JarEntry original, ZipOutputStream zos, long newTimestamp) {
+  ZipEntry clone = new ZipEntry(original)
+  clone.time = newTimestamp
+  def entryIs = originalFile.getInputStream(original)
+  zos.putNextEntry(clone)
+  copyBinaryData(entryIs, zos)
+}
+
+void copyBinaryData(InputStream is, ZipOutputStream zos) {
+  byte[] buffer = new byte[1024]
+  int len = 0
+  while((len = is.read(buffer)) != -1) {
+    zos.write(buffer, 0, len)
+  }
+}
+</code></pre>
+
+<p>This showed me that some entries still didn’t have the same timestamp. Curiously, they were always off by 1 second (1000 milliseconds in the script). Digging back into the Java source code for <a href="http://grepcode.com/file/repository.grepcode.com/java/root/jdk/openjdk/7-b147/java/util/zip/ZipEntry.java#ZipEntry.setTime%28long%29">ZipEntry</a>, I found it was doing some sort of unix - DOS conversion and was losing the resolution of the time.</p>
+
+<p>After a call out to the Twitterverse, a friend pointed out that the <a href="http://ant.apache.org/manual/Tasks/zip.html">Zip Spec</a> specifies that Zip entries have a time resolution of 2 seconds:</p>
+
+<blockquote>
+  <p>The <code>update</code> parameter controls what happens if the ZIP file already exists. When set to <code>yes</code>, the ZIP file is updated with the files specified. (New files are added; old files are replaced with the new versions.) When set to <code>no</code> (the default) the ZIP file is overwritten if any of the files that would be added to the archive are newer than the entries inside the archive. Please note that ZIP files store file modification times with a granularity of two seconds. If a file is less than two seconds newer than the entry in the archive, Apache Ant will not consider it newer.</p>
+</blockquote>
+
+<p>So, we need to mimic this same behavior when producing our new Jar. Basically, we need to convert our timestamp to a resolution of 2 seconds. It looks like this:</p>
+
+<pre><code class="language-groovy">jar {
+  doLast {
+    long ts = fileTree('.') {
+      exclude 'build/**'
+    }.files.sort {
+      -(it.lastModified())
+    }.first().lastModified()
+    File newJar = new File(archivePath.parent, 'new-' + archiveName)
+    ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(newJar))
+    JarFile jf = new JarFile(archivePath)
+    jf.entries().each { entry -&gt;
+      long adjustedTs = convertTimestamp(ts)
+      cloneAndCopyEntry(jf, entry, zos, adjustedTs)
+    }
+    zos.finish()
+    jf.close()
+    compareJars(archivePath, newJar, ts)
+  }
+}
+
+long convertTimestamp(long timestamp) {
+  long seconds = timestamp / 1000
+  if (seconds % 2 != 0) {
+    seconds += 1
+  }
+  return 1000 * seconds
+}
+
+void compareJars(File original, File copy, long ts) {
+  def jf = new JarFile(original)
+  def cjf = new JarFile(copy)
+  long adjustedTs = convertTimestamp(ts)
+  jf.entries().each { entry -&gt;
+    def centry = cjf.getJarEntry(entry.name)
+    compareEntries(entry, centry, adjustedTs)
+  }
+}
+
+void compareEntries(JarEntry entry, JarEntry centry, long ts) {
+  assert entry.name == centry.name
+  assert entry.comment == centry.comment
+  assert entry.compressedSize == centry.compressedSize
+  assert entry.crc == centry.crc
+  assert entry.extra == centry.extra
+  assert entry.method == centry.method
+  assert entry.size == centry.size
+  assert ts == centry.time
+  assert entry.hashCode() == centry.hashCode()
+}
+
+void cloneAndCopyEntry(JarFile originalFile, JarEntry original, ZipOutputStream zos, long newTimestamp) {
+  ZipEntry clone = new ZipEntry(original)
+  clone.time = newTimestamp
+  def entryIs = originalFile.getInputStream(original)
+  zos.putNextEntry(clone)
+  copyBinaryData(entryIs, zos)
+}
+
+void copyBinaryData(InputStream is, ZipOutputStream zos) {
+  byte[] buffer = new byte[1024]
+  int len = 0
+  while((len = is.read(buffer)) != -1) {
+    zos.write(buffer, 0, len)
+  }
+}
+</code></pre>
+
+<h2 id="problem-4---groovy-timestamp-static-field">Problem 4 - Groovy <code>_timestamp</code> static field</h2>
+
+<p>This got my Jars closer, but they still weren’t checksumming the same. At this point, I started using a hex viewer to compare the two files. I used <a href="http://ridiculousfish.com/hexfiend/">Hex Fiend</a> because it can do a side by side diff of files and is free</p>
+
+<p>Using a Hex viewer on a Jar file doesn’t do much since the data is compressed, but it can get you pointed in the right direction. In my cause I could see some byte differences around what appeared to be some class declarations</p>
+
+<p><img src="/assets/hex1.png" alt="Hex View 1" /></p>
+
+<p>Next step was to explode the Jars and compare each of the files. This should a pretty apparent difference</p>
+
+<p><img src="/assets/hex2.png" alt="Hex View 2" /></p>
+
+<p>There was a binary difference in the class file produced by subsequent compilations. The difference was related to a filed named <code>__timestamp_239_neverHappen1387492963633</code></p>
+
+<p>That’s an interesting field, because there’s nothing like that in my source file:</p>
+
+<pre><code class="language-groovy">package john.app
+
+import john.lib.EchoUtil
+
+class EchoApp {
+
+  public static void main(String[] args) {
+    args.each {
+      EchoUtil.echo(it)
+    }
+  }
+}
+</code></pre>
+
+<p>Opening the <code>.class</code> file with a Java Decompiler (JD-GUI in this case), we see this for the class:</p>
+
+<pre><code class="language-java">package john.app;
+
+import groovy.lang.Closure;
+import groovy.lang.GroovyObject;
+import groovy.lang.MetaClass;
+import john.lib.EchoUtil;
+import org.codehaus.groovy.runtime.GeneratedClosure;
+import org.codehaus.groovy.runtime.callsite.CallSite;
+
+public class EchoApp
+  implements GroovyObject
+{
+  public EchoApp()
+  {
+    EchoApp this;
+    CallSite[] arrayOfCallSite = $getCallSiteArray();
+    MetaClass localMetaClass = $getStaticMetaClass();
+    this.metaClass = localMetaClass;
+  }
+
+  public static void main(String[] args)
+  {
+    CallSite[] arrayOfCallSite = $getCallSiteArray(); arrayOfCallSite[0].call(args, new _main_closure1(EchoApp.class)); }
+  static { __$swapInit();
+    long l1 = 0L;
+    __timeStamp__239_neverHappen1387493347537 = l1;
+    long l2 = 1387493347537L; }
+  class _main_closure1 extends Closure implements GeneratedClosure { public _main_closure1(Object _thisObject) { super(_thisObject); }
+    public Object doCall(Object it) { CallSite[] arrayOfCallSite = $getCallSiteArray(); return arrayOfCallSite[0].call(EchoUtil.class, it);
+    }
+
+    public Object doCall()
+    {
+      CallSite[] arrayOfCallSite = $getCallSiteArray();
+      return doCall(null);
+    }
+
+    static
+    {
+      __$swapInit();
+    }
+  }
+}
+</code></pre>
+
+<p>There is in fact a private variable being initialized. Opening the other copy of this class revealed that the name of this variable was changing:</p>
+
+<pre><code>__timeStamp__239_neverHappen1387493347537
+</code></pre>
+
+<p>vs.</p>
+
+<pre><code>__timeStamp__239_neverHappen1387492963633
+</code></pre>
+
+<p>Hmmm. That’s odd. A little more digging lead me to this <a href="https://jira.codehaus.org/browse/GROOVY-6308">Groovy-6308</a> - Timestamps in bytecode prevents baselining of code. The title of this bug is “Timestamps in bytecode prevents baselining of code”. Yup, this seems to be my problem.</p>
+
+<p>It appears this field is injected as some sort of addition to <code>SerialVersionUUID</code>, though the corresponding conversations of that bug and the related bugs seems to indicate that it’s not really used for anything.</p>
+
+<p>Unfortunately, the bugs are listed as being targeted for Groovy 3.0 which doesn’t help me in the near term.</p>
+
+<p>At this point, since it’s a compiler function that’s stopping me, I’m not sure I have a path forward. This will probably get back burnered for a while since it’s not critical and more of a thought experiment than anything.</p>
+
+  </article>
+
+</div>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Imperceptible Thoughts</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col  footer-col-1">
+        <ul class="contact-list">
+          <li>Imperceptible Thoughts</li>
+          <li><a href="mailto:"></a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col  footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/johnrengelman">
+              <span class="icon  icon--github">
+                <svg viewBox="0 0 16 16">
+                  <path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/>
+                </svg>
+              </span>
+
+              <span class="username">johnrengelman</span>
+            </a>
+          </li>
+          
+
+          
+          <li>
+            <a href="https://twitter.com/johnrengelman">
+              <span class="icon  icon--twitter">
+                <svg viewBox="0 0 16 16">
+                  <path fill="#828282" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809
+                  c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27 c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767 c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206 C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271 c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469 c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"/>
+                </svg>
+              </span>
+
+              <span class="username">johnrengelman</span>
+            </a>
+          </li>
+          
+        </ul>
+      </div>
+
+      <div class="footer-col  footer-col-3">
+        <p class="text">The incoherent, incomprehensible, inconceivable, and incrementally intelligent ramblings of John Engelman
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>

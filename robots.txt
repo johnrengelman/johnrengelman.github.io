@@ -1,4 +1,0 @@
-User-agent: *
-Disallow: 
-
-Sitemap: http://johnrengelman.github.io/sitemap.xml 
