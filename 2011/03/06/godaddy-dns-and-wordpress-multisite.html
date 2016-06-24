@@ -6,12 +6,11 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>ETLS 509 - Verification & Validation</title>
-  <meta name="description" content="The incoherent, incomprehensible, inconceivable, and incrementally intelligent ramblings of John Engelman
-">
+  <title>GoDaddy DNS & Wordpress Multisite</title>
+  <meta name="description" content="Tonight, I decided to setup a multisite configuration for my Wordpress installation (which you are reading right now). My sister is involved in marketing and...">
 
   <link rel="stylesheet" href="/css/main.css">
-  <link rel="canonical" href="http://imperceptiblethoughts.com/courses/etls509/">
+  <link rel="canonical" href="http://imperceptiblethoughts.com/2011/03/06/godaddy-dns-and-wordpress-multisite.html">
   <link rel="alternate" type="application/rss+xml" title="Imperceptible Thoughts" href="http://imperceptiblethoughts.com/feed.xml" />
   <script>
     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -72,72 +71,22 @@
         <div class="post">
 
   <header class="post-header">
-    <h1 class="post-title">ETLS 509 - Verification & Validation</h1>
-    <p class="post-meta"></p>
+    <h1 class="post-title">GoDaddy DNS & Wordpress Multisite</h1>
+    <p class="post-meta">Mar 6, 2011</p>
   </header>
 
   <article class="post-content">
-    <h3>Class Info</h3>
-<ul>
-  <li><a href="http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509/ETLS509-01 Validation & Verification Syllabus - Engelman.docx">Syllabus</a></li>
-  <li><a href="http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509/Questions related to the project.docx">Mid-term Project Questions</a></li>
-  <li>Note: Mid-term presentations are moved to Nov. 3 class</li>
-  <li>Mid-term presentation <a href="https://docs.google.com/document/d/1k9q3Jo5Fvz8iB9o4tfr_ceAlp-HfNLXhMxLGByLD1Bo">requirements</a></li>
-  <li>Final Paper <a href="https://docs.google.com/document/d/1_LUgg4QOQoPZ7bj01B4UmHOTNgPjrpbpx5t_VQJOHas">requirements</a></li>
-</ul>
+    <p>Tonight, I decided to setup a multisite configuration for my Wordpress installation (which you are reading right now). My sister is involved in marketing and advertising and wanted to start her own blog. I figured this was a good opportunity to play with the server some more.</p>
 
-<h3>Lectures</h3>
-<ol>
-  <li>Class 1 - 9/15/15</li>
-  <ul>
-    <li><a href="http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509/Lecture 1/ETLS 509 - Validation & Verification_01.pptx">Slides</a></li>
-  </ul>
-  <li>Class 2 - 9/22/15</li>
-  <ul>
-    <li><a href="http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509/Lecture 2/ETLS 509 - Validation & Verification_02.pptx">Slides</a></li>
-  </ul>
-  <li> Class 3 - 9/29/15 - No Class</li>
-  <li> Class 4 - 10/6/15</li>
-  <ul>
-    <li><a href="http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509/Lecture 3/ETLS 509 - Validation & Verification_03.pptx">Slides (Week 3 Slides)</a></li>
-    <li><a href="http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509/Lecture 4/ETLS 509 - Validation & Verification_04.pptx">Slides</a></li>
-    <li><a href="http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509/Lecture 4/TechMeasurementGuide_2005-1227.pdf">Tech Measurement Guide</a></li>
-    <li><a href="http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509/Lecture 4/Trucks ‘R US Fleet Management.docx">Trucks 'R Us MOEs</a></li>
-    <li><a href="http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509/Lecture 4/Verification Matrix_Completed.xls">Sample RVTM</a></li>
-  </ul>
-  <li> Class 5 - 10/13/15</li>
-  <ul>
-    <li><a href="http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509/Lecture 5/ETLS 509 - Validation & Verification_05.pptx">Slides</a></li>
-    <li><a href="http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509/Lecture 5/T_NHTSA-Laboratory_Test_Procedure_NCAP.pdf">NHTSA Laboratory Test Procedure</a></li>
-  </ul>
-  <li> Class 6 - 10/20/15</li>
-  <ul>
-    <li><a href="http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509/Lecture 6/ETLS 509 - Validation & Verification_06.pptx">Slides</a></li>
-    <li><a href="http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509/Lecture 6/System_Specification.doc">Example System Specification (Type A/B/C/D/E)</a></li>
-  </ul>
-  <li> Class 7 - 10/27/15</li>
-  <ul>
-    <li><a href="http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509/Lecture 7/ETLS 509 - Validation & Verification_07.pptx">Slides</a></li>
-    <li><a href="https://docs.google.com/document/d/18w6ClCj9Tf5vTVenZCvgAWQ0U58GVDgCffRNBLQG_sQ">Human Factors Interactions (In Class Notes)</a></li>
-    <li><a href="https://docs.google.com/document/d/1vgFfi27tPXyA4U6yiBLvHKohnDOUaAxnoNlwx5rdW8Y">Trucks 'R Us Human Factors</a></li>
-    <li><a href="http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509/Lecture 7/Human_System_Engineering_%28NSWC%29.pdf">Human Systems Engineering (Interactions)</a></li>
-    <li><a href="http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509/Lecture 7/Gersh.pdf">Understanding Human Interaction with Complex Systems</a></li>
-    <li><a href="http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509/Lecture 7/gray-070829.pdf">Cognitive Modeling</a></li>
-  </ul>
-  <li> Class 8 - Midterm Presentations - 11/3/15</li>
-  <li> Class 9 - 11/10/15</li>
-  <ul>
-    <li><a href="http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509/Lecture 9/ETLS 509 - Validation & Verification_09.pptx">Slides</a></li>
-    <li><a href="https://docs.google.com/spreadsheets/d/1YIg5K-TmKXErP8fERYoTr4I59FeW3Qr1Ba_g_Uc1m8g">RMA Analysis</a></li>
-  </ul>
-  <li> Class 10 - 11/17/15</li>
-  <ul>
-    <li><a href="http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509/Lecture 10/ETLS 509 - Validation & Verification_10.pptx">Slides</a></li>
-  </ul>
-  <li> Class 11 - 11/24/15</li>
-  <li> Class 12 - 12/1/15</li>
-  <li> Class 13 - 12/8/15</li>
-</ol>
+<!-- more -->
+
+<p>I decided to use the Subdomain configuration and the instructions found <a href="http://codex.wordpress.org/Create_A_Network">here</a>. Only, initially, I didn’t want to apply a blanket <code>*.johnrengelman.com</code> DNS redirect. I don’t know why I didn’t want to do this. It was an arbitrary decision on my part. An arbitrary decision that ended up costing me about 2 hours tonight ! <img class="emoji" title=":frowning:" alt=":frowning:" src="https://assets.github.com/images/icons/emoji/unicode/1f626.png" height="20" width="20" align="absmiddle" /></p>
+
+<p>Somehow, as I was configuring the DNS entries (using GoDaddy’s DNS Manager), I messed up something. After completing the installation in Wordpress, I couldn’t reach my sister’s <a href="http://amanda.johnrengelman.com">site</a>. I could open any other sub-domain which would redirect to my homepage.</p>
+
+<p>After backtracking and restoring backups and reinstalling, I still couldn’t open the site. The confusing part is that <code>nslookup</code> resolved the address correctly, but <code>ping</code> couldn’t reach my server. <img class="emoji" title=":confused:" alt=":confused:" src="https://assets.github.com/images/icons/emoji/unicode/1f615.png" height="20" width="20" align="absmiddle" /> Very confusing.</p>
+
+<p>It appears that some entry I placed into the DNS records propagated out and wasn’t immediately updated when I entered new settings. I decided to give up for a few minutes and when I came back, everything was working. Ugh. Server work is very frustrating at times.</p>
 
   </article>
 

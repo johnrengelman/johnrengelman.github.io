@@ -6,11 +6,11 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>[Updated] Eclipse STS vs IntelliJ IDEA for Grails Development</title>
-  <meta name="description" content="So, I have become increasingly frustrated with IntelliJ for doing Grails development. I know. Everyone swears by it being “THE” IDE for Grails work, but I ju...">
+  <title>Grails-Gradle Plugin 2.0.0 Released</title>
+  <meta name="description" content="I am happy to announce that the 2.0.0 release for the Grails-Gradle plugin has finally been released.">
 
   <link rel="stylesheet" href="/css/main.css">
-  <link rel="canonical" href="http://imperceptiblethoughts.com/2011/04/20/updated-eclipse-sts-vs-intellij-idea-for-grails-development.html">
+  <link rel="canonical" href="http://imperceptiblethoughts.com/2014/01/26/grails-gradle-plugin-2-0-0-released.html">
   <link rel="alternate" type="application/rss+xml" title="Imperceptible Thoughts" href="http://imperceptiblethoughts.com/feed.xml" />
   <script>
     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -46,11 +46,15 @@
           
         
           
+        
+          
+          <a class="page-link" href="/projects/index.html">Open Source Projects</a>
+          
+        
+          
+        
+          
           <a class="page-link" href="/courses/index.html">SysEng Courses</a>
-          
-        
-          
-        
           
         
           
@@ -67,32 +71,27 @@
         <div class="post">
 
   <header class="post-header">
-    <h1 class="post-title">[Updated] Eclipse STS vs IntelliJ IDEA for Grails Development</h1>
-    <p class="post-meta">Apr 20, 2011</p>
+    <h1 class="post-title">Grails-Gradle Plugin 2.0.0 Released</h1>
+    <p class="post-meta">Jan 26, 2014</p>
   </header>
 
   <article class="post-content">
-    <p>So, I have become increasingly frustrated with IntelliJ for doing Grails development. I know. Everyone swears by it being “THE” IDE for Grails work, but I just can’t get on that boat. Not only do I find the UI a total cluster-fuck and it nearly impossible to find the information that I want on the screen when I want it, but it is also a serious resource hog.&lt;/p&gt;</p>
+    <p>I am happy to announce that the 2.0.0 release for the Grails-Gradle plugin has finally been released.</p>
 
-<!-- more -->
+<p>This release has been a long time coming, and offers some significant improvements over the 1.1.0 release. Additionally, many people have been relying on the 2.0.0-SNAPSHOT release and this locks-in a stable version that is now available in Maven Central and the Grails Central repositories.</p>
 
-<p>I have a brand new Sandy Bridge, Quad-Core Macbook Pro with 4 GB of RAM and I’m constantly fighting with IntelliJ when it’s doing something. This is my machine on any given day: iTunes, Twitter Client, Skype Client, Chrome (w/ 4 open tabs), Firefox (maybe), and IntelliJ…that’s it. That’s all I have running. There are a couple background apps (Dropbox, TunnelBlick SSH) but that’s really all that I have running…yet I still have to constantly wait for IntelliJ to do things…I get the stupid beach ball, wait-while-I-inexplicably-tie-up-4-core-and-4-GB-of-RAM-for-no-damn-reason icon. UGH. So frustrating. Not to mention, IntelliJ’s inability to perform the simplest in task in Subversion without you having to walk away for 10 mins while it does it.</p>
+<p><strong>ChangeLog</strong></p>
 
-<p>So I’ve decided on a little experiment. SpringSource recently released version 2.6.0-SR1 of their STS tool set. STS is build on top of the Eclipse…what I consider the premiere Java IDE. So I’m installing. And I’m going to see if I can get some work done in STS for the rest of the week. And next week, I’ll come back to this post with some thoughts and a final decision on what I’m going to use.</p>
+<ul>
+  <li>Automatic configuration of Grails repositories using <code>grails.central()</code> in your <code>repositories</code> block</li>
+  <li>Automatic configuration of Grails, Groovy, and Spring Loaded versions</li>
+  <li>Implementation of a build task structure more similar to a standard Java project (i.e. clean, build, assemble, test, check ,etc.)</li>
+  <li>Better integration with IntelliJ IDEA (plugin source is now available)</li>
+  <li>Definition of Grails source sets to allow for task input/output configuration</li>
+  <li>Various bug fixes and improvements in Grails command spawning.</li>
+</ul>
 
-<h2 id="initial-impressions">Initial Impressions</h2>
-
-<p>I installed STS without any problems on my machine, but quickly found that I needed some items to get up and running. Surprise, surprise. First, you need to install/activate the Grails support for STS. This is done from the STS Dashboard when the application first starts up. I should have remembered this since a co-worker wrote an article about STS/Grails not to long ago: <a href="http://www.objectpartners.com/2011/02/15/start-using-eclipse-with-grails-support-via-sts/">Start Using Eclipse with Grails Support via STS</a>.</p>
-
-<p>Done. Next step, get my project from SVN. Fail. Apparently STS doesn’t ship with Subclipse installed by default. Really not that big of a surprise, since Eclipse doesn’t either. Just another annoyance.</p>
-
-<h2 id="development">Development</h2>
-
-<p>After finally getting my project checked out and configuring some additional source folders so Eclipse could find all the Groovy classes, I got up a running. Yet there was one nagging issue I couldn’t seem to resolve. Apparently STS applies Java Code checks to Groovy files. In most cases this is valid, since Groovy is built on top of Java. However, STS kept finding one error that really annoyed me (disclaimer: I know the following code example is actually bad code. It’s not mine. I also know how to fix it, but I’m not going to since it’s production code. Plus, it’s valid in Groovy for whatever reason).</p>
-
-<h2 id="end-game">End Game</h2>
-
-<p>It appears that STS still has some work to do with Groovy syntax support. Or maybe some way to adjust which Java Checks are applied to .groovy files. I’m still playing, but in the meantime, I’ve upgraded my machine to 8GB of RAM and IntelliJ is performing much better…crazy, that I need 8GB to get good performance, but oh well.</p>
+<p>Additional information can be found on the plugin’s Github <a href="https://github.com/grails/grails-gradle-plugin">page</a>.</p>
 
   </article>
 
