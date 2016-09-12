@@ -6,12 +6,11 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>ETLS 509 - Verification & Validation</title>
-  <meta name="description" content="The incoherent, incomprehensible, inconceivable, and incrementally intelligent ramblings of John Engelman
-">
+  <title>Contributing to Grails-Core With IntelliJ IDEA 11</title>
+  <meta name="description" content="I’ve recently started to work on contributing patches to the Grails Framework project. I’ve been lucky enough to be working for a client that is ok with usin...">
 
   <link rel="stylesheet" href="/css/main.css">
-  <link rel="canonical" href="http://imperceptiblethoughts.com/courses/etls509/">
+  <link rel="canonical" href="http://imperceptiblethoughts.com/2012/01/16/contributing-to-grails-core-with-intellij-idea-11.html">
   <link rel="alternate" type="application/rss+xml" title="Imperceptible Thoughts" href="http://imperceptiblethoughts.com/feed.xml" />
   <script>
     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -60,6 +59,14 @@
         
           
         
+          
+        
+          
+        
+          
+        
+          
+        
       </div>
     </nav>
 
@@ -72,72 +79,24 @@
         <div class="post">
 
   <header class="post-header">
-    <h1 class="post-title">ETLS 509 - Verification & Validation</h1>
-    <p class="post-meta"></p>
+    <h1 class="post-title">Contributing to Grails-Core With IntelliJ IDEA 11</h1>
+    <p class="post-meta">Jan 16, 2012</p>
   </header>
 
   <article class="post-content">
-    <h3>Class Info</h3>
-<ul>
-  <li><a href="http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509/ETLS509-01 Validation & Verification Syllabus - Engelman.docx">Syllabus</a></li>
-  <li><a href="http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509/Questions related to the project.docx">Mid-term Project Questions</a></li>
-  <li>Note: Mid-term presentations are moved to Nov. 3 class</li>
-  <li>Mid-term presentation <a href="https://docs.google.com/document/d/1k9q3Jo5Fvz8iB9o4tfr_ceAlp-HfNLXhMxLGByLD1Bo">requirements</a></li>
-  <li>Final Paper <a href="https://docs.google.com/document/d/1_LUgg4QOQoPZ7bj01B4UmHOTNgPjrpbpx5t_VQJOHas">requirements</a></li>
-</ul>
+    <p>I’ve recently started to work on contributing patches to the Grails Framework project. I’ve been lucky enough to be working for a client that is ok with using the latest versions of Grails for its back-end applications, so I’ve been able to play around a lot with Grails 2.0.0 since it’s release at the end of last year. However, this has resulted in me encountering a number of unexpected/irritating bugs that have sometimes prevented code from being migrated “as-is”. So, I’ve decided to try and learn and contribute back by working on some bugs myself.</p>
 
-<h3>Lectures</h3>
-<ol>
-  <li>Class 1 - 9/15/15</li>
-  <ul>
-    <li><a href="http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509/Lecture 1/ETLS 509 - Validation & Verification_01.pptx">Slides</a></li>
-  </ul>
-  <li>Class 2 - 9/22/15</li>
-  <ul>
-    <li><a href="http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509/Lecture 2/ETLS 509 - Validation & Verification_02.pptx">Slides</a></li>
-  </ul>
-  <li> Class 3 - 9/29/15 - No Class</li>
-  <li> Class 4 - 10/6/15</li>
-  <ul>
-    <li><a href="http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509/Lecture 3/ETLS 509 - Validation & Verification_03.pptx">Slides (Week 3 Slides)</a></li>
-    <li><a href="http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509/Lecture 4/ETLS 509 - Validation & Verification_04.pptx">Slides</a></li>
-    <li><a href="http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509/Lecture 4/TechMeasurementGuide_2005-1227.pdf">Tech Measurement Guide</a></li>
-    <li><a href="http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509/Lecture 4/Trucks ‘R US Fleet Management.docx">Trucks 'R Us MOEs</a></li>
-    <li><a href="http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509/Lecture 4/Verification Matrix_Completed.xls">Sample RVTM</a></li>
-  </ul>
-  <li> Class 5 - 10/13/15</li>
-  <ul>
-    <li><a href="http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509/Lecture 5/ETLS 509 - Validation & Verification_05.pptx">Slides</a></li>
-    <li><a href="http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509/Lecture 5/T_NHTSA-Laboratory_Test_Procedure_NCAP.pdf">NHTSA Laboratory Test Procedure</a></li>
-  </ul>
-  <li> Class 6 - 10/20/15</li>
-  <ul>
-    <li><a href="http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509/Lecture 6/ETLS 509 - Validation & Verification_06.pptx">Slides</a></li>
-    <li><a href="http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509/Lecture 6/System_Specification.doc">Example System Specification (Type A/B/C/D/E)</a></li>
-  </ul>
-  <li> Class 7 - 10/27/15</li>
-  <ul>
-    <li><a href="http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509/Lecture 7/ETLS 509 - Validation & Verification_07.pptx">Slides</a></li>
-    <li><a href="https://docs.google.com/document/d/18w6ClCj9Tf5vTVenZCvgAWQ0U58GVDgCffRNBLQG_sQ">Human Factors Interactions (In Class Notes)</a></li>
-    <li><a href="https://docs.google.com/document/d/1vgFfi27tPXyA4U6yiBLvHKohnDOUaAxnoNlwx5rdW8Y">Trucks 'R Us Human Factors</a></li>
-    <li><a href="http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509/Lecture 7/Human_System_Engineering_%28NSWC%29.pdf">Human Systems Engineering (Interactions)</a></li>
-    <li><a href="http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509/Lecture 7/Gersh.pdf">Understanding Human Interaction with Complex Systems</a></li>
-    <li><a href="http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509/Lecture 7/gray-070829.pdf">Cognitive Modeling</a></li>
-  </ul>
-  <li> Class 8 - Midterm Presentations - 11/3/15</li>
-  <li> Class 9 - 11/10/15</li>
-  <ul>
-    <li><a href="http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509/Lecture 9/ETLS 509 - Validation & Verification_09.pptx">Slides</a></li>
-    <li><a href="https://docs.google.com/spreadsheets/d/1YIg5K-TmKXErP8fERYoTr4I59FeW3Qr1Ba_g_Uc1m8g">RMA Analysis</a></li>
-  </ul>
-  <li> Class 10 - 11/17/15</li>
-  <ul>
-    <li><a href="http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509/Lecture 10/ETLS 509 - Validation & Verification_10.pptx">Slides</a></li>
-  </ul>
-  <li> Class 11 - 11/24/15</li>
-  <li> Class 12 - 12/1/15</li>
-  <li> Class 13 - 12/8/15</li>
-</ol>
+<p>If you’re looking to contribute yourself, start here <a href="http://grails.org/Contribute.">http://grails.org/Contribute.</a> I didn’t have any issues getting up and running with my own fork of grails-core. I did have to execute a <code>./gradlew compile</code> task though before I was able to get any test to execute…and don’t worry, when this takes a while. There are <strong>A LOT</strong> of dependencies to download.</p>
+
+<p>My next step was to start using IntelliJ 11 since it would allow me to quickly debug failing tests, so I again returned to the grails.org website and found the executing the <code>./gradlew idea</code> task will produce the necessary IntelliJ project files…Excellent. But this is where the problems started.</p>
+
+<p>First, I had to open the Module Settings for <code>grails-script</code> and remove the entry under ‘Source Folders’. This was causing IntelliJ to not save any edits I made to the module properties. It appears that this entry isn’t needed anyway (and I haven’t run into any issues with it yet).</p>
+
+<p>Second, the project wouldn’t compile because the following 2 classes couldn’t be found:<code>com.springsource.loaded.ReloadEventProcessorPlugin</code> and <code>com.springsource.loaded.Plugins</code>. After some searching, I found the <code>springloaded-core-1.0.2.jar</code> in my Gradle User Home (<code>~/.gradle</code>) directory (look under <code>~/.gradle/caches/artifacts-7</code>, it maybe be something different then <code>artifact-7</code>). I copied this jar to my home directory, opened the Module Settings for <code>grails-core-grails-core</code> and added a Jar Dependency that pointed to the <code>springloaded-core-1.0.2.jar</code> in my home directory.</p>
+
+<p>Third, the <code>grails-plugin-validation</code> module won’t compile because it was missing a dependency to the <code>grails-web</code> module. Again, I opened the Module Settings for <code>grails-plugin-validation</code> and added a Module Dependency to <code>grails-web</code>.</p>
+
+<p>Now, I can finally run and debug my tests and get working on some patches.</p>
 
   </article>
 

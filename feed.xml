@@ -6,8 +6,8 @@
 </description>
     <link>http://imperceptiblethoughts.com/</link>
     <atom:link href="http://imperceptiblethoughts.com/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Fri, 24 Jun 2016 10:48:22 -0700</pubDate>
-    <lastBuildDate>Fri, 24 Jun 2016 10:48:22 -0700</lastBuildDate>
+    <pubDate>Mon, 12 Sep 2016 11:03:17 -0500</pubDate>
+    <lastBuildDate>Mon, 12 Sep 2016 11:03:17 -0500</lastBuildDate>
     <generator>Jekyll v2.5.3</generator>
     
       <item>
@@ -34,9 +34,9 @@ before finally switching the DNS record over, but so far I’m happy.&lt;/p&gt;
 
 &lt;p&gt;More to come!&lt;/p&gt;
 </description>
-        <pubDate>Tue, 04 Feb 2014 22:00:00 -0800</pubDate>
-        <link>http://imperceptiblethoughts.com/2014/02/04/yet-another-blog-hosting-change.html</link>
-        <guid isPermaLink="true">http://imperceptiblethoughts.com/2014/02/04/yet-another-blog-hosting-change.html</guid>
+        <pubDate>Wed, 05 Feb 2014 00:00:00 -0600</pubDate>
+        <link>http://imperceptiblethoughts.com/2014/02/05/yet-another-blog-hosting-change.html</link>
+        <guid isPermaLink="true">http://imperceptiblethoughts.com/2014/02/05/yet-another-blog-hosting-change.html</guid>
         
         
       </item>
@@ -60,16 +60,16 @@ before finally switching the DNS record over, but so far I’m happy.&lt;/p&gt;
 
 &lt;p&gt;Additional information can be found on the plugin’s Github &lt;a href=&quot;https://github.com/grails/grails-gradle-plugin&quot;&gt;page&lt;/a&gt;.&lt;/p&gt;
 </description>
-        <pubDate>Sun, 26 Jan 2014 22:00:00 -0800</pubDate>
-        <link>http://imperceptiblethoughts.com/2014/01/26/grails-gradle-plugin-2-0-0-released.html</link>
-        <guid isPermaLink="true">http://imperceptiblethoughts.com/2014/01/26/grails-gradle-plugin-2-0-0-released.html</guid>
+        <pubDate>Mon, 27 Jan 2014 00:00:00 -0600</pubDate>
+        <link>http://imperceptiblethoughts.com/2014/01/27/grails-gradle-plugin-2-0-0-released.html</link>
+        <guid isPermaLink="true">http://imperceptiblethoughts.com/2014/01/27/grails-gradle-plugin-2-0-0-released.html</guid>
         
         
       </item>
     
       <item>
         <title>Reproducible Multi-Project Gradle Builds (Part 2)</title>
-        <description>&lt;p&gt;Follow up to my previous post - &lt;a href=&quot;/2013/12/16/reproducible-multi-project-gradle-builds.html&quot;&gt;Reproducible Multi-Project Gradle builds&lt;/a&gt;&lt;/p&gt;
+        <description>&lt;p&gt;Follow up to my previous post - &lt;a href=&quot;/2013/12/17/reproducible-multi-project-gradle-builds.html&quot;&gt;Reproducible Multi-Project Gradle builds&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;I got around to doing some testing on this using a simple Gradle project. Very quickly did I find out that this particular strategy was not going to be easy…and potentially impossible.&lt;/p&gt;
 
@@ -378,9 +378,9 @@ before finally switching the DNS record over, but so far I’m happy.&lt;/p&gt;
 
 &lt;p&gt;At this point, since it’s a compiler function that’s stopping me, I’m not sure I have a path forward. This will probably get back burnered for a while since it’s not critical and more of a thought experiment than anything.&lt;/p&gt;
 </description>
-        <pubDate>Thu, 19 Dec 2013 22:00:00 -0800</pubDate>
-        <link>http://imperceptiblethoughts.com/2013/12/19/reproducible-multi-project-gradle-builds-part-2.html</link>
-        <guid isPermaLink="true">http://imperceptiblethoughts.com/2013/12/19/reproducible-multi-project-gradle-builds-part-2.html</guid>
+        <pubDate>Fri, 20 Dec 2013 00:00:00 -0600</pubDate>
+        <link>http://imperceptiblethoughts.com/2013/12/20/reproducible-multi-project-gradle-builds-part-2.html</link>
+        <guid isPermaLink="true">http://imperceptiblethoughts.com/2013/12/20/reproducible-multi-project-gradle-builds-part-2.html</guid>
         
         
       </item>
@@ -489,9 +489,9 @@ before finally switching the DNS record over, but so far I’m happy.&lt;/p&gt;
 
 &lt;p&gt;All of this is theoretical at this point, I’ve only started working on an implementation. I’ll update this post as I learn more.&lt;/p&gt;
 </description>
-        <pubDate>Mon, 16 Dec 2013 22:00:00 -0800</pubDate>
-        <link>http://imperceptiblethoughts.com/2013/12/16/reproducible-multi-project-gradle-builds.html</link>
-        <guid isPermaLink="true">http://imperceptiblethoughts.com/2013/12/16/reproducible-multi-project-gradle-builds.html</guid>
+        <pubDate>Tue, 17 Dec 2013 00:00:00 -0600</pubDate>
+        <link>http://imperceptiblethoughts.com/2013/12/17/reproducible-multi-project-gradle-builds.html</link>
+        <guid isPermaLink="true">http://imperceptiblethoughts.com/2013/12/17/reproducible-multi-project-gradle-builds.html</guid>
         
         
       </item>
@@ -500,7 +500,7 @@ before finally switching the DNS record over, but so far I’m happy.&lt;/p&gt;
         <title>Creating Self-contained, Executable Jars With Gradle and Shadow</title>
         <description>
 </description>
-        <pubDate>Tue, 08 Oct 2013 11:43:54 -0700</pubDate>
+        <pubDate>Tue, 08 Oct 2013 13:43:54 -0500</pubDate>
         <link>http://imperceptiblethoughts.com/2013/10/08/creating-self-contained-executable-jars-with-gradle-and-shadow.html</link>
         <guid isPermaLink="true">http://imperceptiblethoughts.com/2013/10/08/creating-self-contained-executable-jars-with-gradle-and-shadow.html</guid>
         
@@ -517,9 +517,9 @@ before finally switching the DNS record over, but so far I’m happy.&lt;/p&gt;
 
 &lt;p&gt;I’m not going to promote one over the other like I said because I don’t have enough usage of Eclipse recently to make a comparison and don’t really have the time or desire to look at it any time soon. So I’ll just leave it at that.&lt;/p&gt;
 </description>
-        <pubDate>Mon, 07 Oct 2013 22:00:00 -0700</pubDate>
-        <link>http://imperceptiblethoughts.com/2013/10/07/change-of-heart.html</link>
-        <guid isPermaLink="true">http://imperceptiblethoughts.com/2013/10/07/change-of-heart.html</guid>
+        <pubDate>Tue, 08 Oct 2013 00:00:00 -0500</pubDate>
+        <link>http://imperceptiblethoughts.com/2013/10/08/change-of-heart.html</link>
+        <guid isPermaLink="true">http://imperceptiblethoughts.com/2013/10/08/change-of-heart.html</guid>
         
         
       </item>
@@ -528,7 +528,7 @@ before finally switching the DNS record over, but so far I’m happy.&lt;/p&gt;
         <title>Profiling Grails Applications With VisualVM</title>
         <description>
 </description>
-        <pubDate>Mon, 25 Mar 2013 06:55:00 -0700</pubDate>
+        <pubDate>Mon, 25 Mar 2013 08:55:00 -0500</pubDate>
         <link>http://imperceptiblethoughts.com/2013/03/25/profiling-grails-applications-with-visualvm.html</link>
         <guid isPermaLink="true">http://imperceptiblethoughts.com/2013/03/25/profiling-grails-applications-with-visualvm.html</guid>
         
@@ -539,7 +539,7 @@ before finally switching the DNS record over, but so far I’m happy.&lt;/p&gt;
         <title>Recovering From Merge Errors in Mercurial With Sub-Repositories and Named Branches</title>
         <description>
 </description>
-        <pubDate>Mon, 25 Mar 2013 06:51:00 -0700</pubDate>
+        <pubDate>Mon, 25 Mar 2013 08:51:00 -0500</pubDate>
         <link>http://imperceptiblethoughts.com/2013/03/25/recovering-from-merge-errors-in-mercurial-with-sub-repositories-and-named-branches.html</link>
         <guid isPermaLink="true">http://imperceptiblethoughts.com/2013/03/25/recovering-from-merge-errors-in-mercurial-with-sub-repositories-and-named-branches.html</guid>
         
@@ -552,7 +552,7 @@ before finally switching the DNS record over, but so far I’m happy.&lt;/p&gt;
 
 &lt;p&gt;I’m going to republish some old posts of mine to this blog. I’m also going to republish some blog posts from my &lt;a href=&quot;http://www.objectpartners.com&quot;&gt;Object Partners&lt;/a&gt; blog here as well.&lt;/p&gt;
 </description>
-        <pubDate>Mon, 25 Mar 2013 06:32:00 -0700</pubDate>
+        <pubDate>Mon, 25 Mar 2013 08:32:00 -0500</pubDate>
         <link>http://imperceptiblethoughts.com/2013/03/25/new-blog-hooray.html</link>
         <guid isPermaLink="true">http://imperceptiblethoughts.com/2013/03/25/new-blog-hooray.html</guid>
         
@@ -575,9 +575,9 @@ before finally switching the DNS record over, but so far I’m happy.&lt;/p&gt;
 
 &lt;p&gt;Now, I can finally run and debug my tests and get working on some patches.&lt;/p&gt;
 </description>
-        <pubDate>Sun, 15 Jan 2012 22:00:00 -0800</pubDate>
-        <link>http://imperceptiblethoughts.com/2012/01/15/contributing-to-grails-core-with-intellij-idea-11.html</link>
-        <guid isPermaLink="true">http://imperceptiblethoughts.com/2012/01/15/contributing-to-grails-core-with-intellij-idea-11.html</guid>
+        <pubDate>Mon, 16 Jan 2012 00:00:00 -0600</pubDate>
+        <link>http://imperceptiblethoughts.com/2012/01/16/contributing-to-grails-core-with-intellij-idea-11.html</link>
+        <guid isPermaLink="true">http://imperceptiblethoughts.com/2012/01/16/contributing-to-grails-core-with-intellij-idea-11.html</guid>
         
         
       </item>
