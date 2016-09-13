@@ -9,3 +9,4 @@ s3: http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509
 * [Syllabus](syllabus.html)
 * [Class Schedule](schedule.html)
 * [Project Info](project.html)
+* [Project Outline](project_outline.html)
