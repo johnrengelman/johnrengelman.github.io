@@ -4,12 +4,12 @@ title: ETLS 509 - V&V (Fall 2016) Syllabus
 ---
 
 
-|                     |                                                                                                                              |
-|:--------------------|:-----------------------------------------------------------------------------------------------------------------------------|
-| __Time:__           | Tuesday, 6:00pm - 9:00pm                                                                                                     |
-| __Location:__       | OWS 250                                                                                                                      |
-| __Course Content:__ | [http://www.johnrengelman.com/courses/2016/etls509/index.html](http://www.johnrengelman.com/courses/2016/etls509/index.html) |
-| __Online Class:__   | TBD                                                                                                                          |
+|                     |                                                                                                                                          |
+|:--------------------|:-----------------------------------------------------------------------------------------------------------------------------------------|
+| __Time:__           | Tuesday, 6:00pm - 9:00pm                                                                                                                 |
+| __Location:__       | OWS 250                                                                                                                                  |
+| __Course Content:__ | [http://www.johnrengelman.com/courses/2016/etls509/index.html](http://www.johnrengelman.com/courses/2016/etls509/index.html)             |
+| __Online Class:__   | [https://hangouts.google.com/hangouts/_/pzs5xi4igbeflbwevhgu7l7x7ae](https://hangouts.google.com/hangouts/_/pzs5xi4igbeflbwevhgu7l7x7ae) |
 
 <br/>
 
