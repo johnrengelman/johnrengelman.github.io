@@ -15,5 +15,5 @@ s3: http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509
 
 1. Week 1
 1. Week 2
-  1. [Intro Slides](files/01_Intro.pdf)
-  1. [V&V Slides](files/02_V&V.pdf)
+   1. [Intro Slides](files/01_Intro.pdf)
+   1. [V&V Slides](files/02_V&V.pdf)
