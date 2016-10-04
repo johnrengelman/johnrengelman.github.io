@@ -20,3 +20,4 @@ title: ETLS 509 - V&V (Fall 2016) Class Schedule
 | Dec. 5        |  13  | Integrating Requirements with Validation / Verification / Cost                                                                                                                            |                                        |
 | Dec. 12       |  14  | Student Project Presentations                                                                                                                                                             |                                        |
 | Dec. 19       |  15  | No Class                                                                                                                                                                                  |                                        |
+{:.bordertable}
