@@ -25,3 +25,5 @@ s3: http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509
    1. [Type 1 & 2 Testing Slides](files/04_TEST_1_2.pdf)
 1. Week 5
    1. [Type 3 & 4 Testing Slides](files/05_TEST_3_4.pdf)
+1. Week 6
+   1. [Requirement Definition](files/06_Reqs.pdf)
