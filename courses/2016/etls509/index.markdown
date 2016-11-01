@@ -27,3 +27,8 @@ s3: http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509
    1. [Type 3 & 4 Testing Slides](files/05_TEST_3_4.pdf)
 1. Week 6
    1. [Requirement Definition](files/06_Reqs.pdf)
+1. Week 7
+   1. Midterm Presentations
+1. Week 8
+  1. [Human Factors Slides](files/08_HumanFactors.pdf)
+  1. [ILS](files/10_ILS.pdf)
