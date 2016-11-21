@@ -11,6 +11,7 @@ s3: http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509
 * [Project Info](project.html)
 * [Project Outline](project_outline.html)
 * [Interesting Links](links.html)
+* [Oxygenator RMA Analysis](project-rma-analysis.html)
 
 # Lectures
 
@@ -32,3 +33,6 @@ s3: http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509
 1. Week 8
   1. [Human Factors Slides](files/08_HumanFactors.pdf)
   1. [ILS](files/10_ILS.pdf)
+1. Week 9 - No Class
+1. Week 10
+  1. [RMA](files/09_RMA.pdf)
