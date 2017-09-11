@@ -4,11 +4,12 @@ title: ETLS 509 - V&V (Fall 2017) Syllabus
 ---
 
 
-|                     |                                                                                                                              |
-|:--------------------|:-----------------------------------------------------------------------------------------------------------------------------|
-| __Time:__           | Tuesday, 6:00pm - 9:00pm                                                                                                     |
-| __Location:__       | OWS 250                                                                                                                      |
-| __Course Content:__ | [http://www.johnrengelman.com/courses/2017/etls509/index.html](http://www.johnrengelman.com/courses/2017/etls509/index.html) |
+|                       |                                                                                                                                                                                |
+|:----------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| __Time:__             | Tuesday, 5:45pm - 8:45pm                                                                                                                                                       |
+| __Location:__         | OWS 250                                                                                                                                                                        |
+| __Course Content:__   | [http://www.johnrengelman.com/courses/2017/etls509/index.html](http://www.johnrengelman.com/courses/2017/etls509/index.html)                                                   |
+| __Class Email List:__ | [https://groups.google.com/forum/#!forum/stu-etls-509-fall-2017](https://groups.google.com/forum/#!forum/stu-etls-509-fall-2017) and `stu-etls-509-fall-2017@googlegroups.com` |
 
 <br/>
 
