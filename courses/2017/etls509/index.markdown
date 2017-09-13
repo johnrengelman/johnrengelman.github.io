@@ -14,7 +14,7 @@ s3: http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509
 
 # Lectures
 
-1. Week 1 - [Slides](../../2016/files/01_Intro.pdf)
+1. Week 1 - [Slides](../../2016/etls509/files/01_Intro.pdf)
    1. Class Introductions
    1. Project Topics and Team Formation
    1. Case Study Selection - (see Links page)
