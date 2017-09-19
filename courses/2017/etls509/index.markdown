@@ -18,7 +18,7 @@ s3: http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509
    1. Class Introductions
    1. Project Topics and Team Formation
    1. Case Study Selection - (see Links page)
-1. Week 2 - [Slides](../../2016/elts509/files/02_V&V.pdf)
+1. Week 2 - [Slides](../../2016/etls509/files/02_V&V.pdf)
    1. Validation & Verification
    1. Measures of Effectiveness
    1. Case Study Discussion
