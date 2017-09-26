@@ -23,3 +23,7 @@ s3: http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509
    1. Measures of Effectiveness
    1. Case Study Discussion
    1. Project Topics
+1. Week 3 - [Slides](../../2016/etls509/files/03_TEMP.pdf)
+   1. Test & Evaluation Master Plan (TEMP)
+   1. 777 Video
+   1. Project RFPs
