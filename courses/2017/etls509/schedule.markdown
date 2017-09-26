@@ -7,8 +7,8 @@ title: ETLS 509 - V&V (Fall 2017) Class Schedule
 |:--------------|:----:|:------------------------------------------------------------------------------|:---------------------------------------------------------------|
 | Sept. 12      |  1   | Introduction to course / course objectives, Review of Systems Engineering     | N/A                                                            |
 | Sept. 19      |  2   | System Design Processes, Define Validation & Verification, MOEs, Case Studies | Project Selection, Case Study Discussion                       |
-| Sept. 26      |  3   | Validation & Verification Processes                                           | OV-1, Project Charter,                                         |
-| Oct. 3        |  4   | Analytical & Simulation Testing, Type 1/2 Testing                             | MOEs                                                           |
+| Sept. 26      |  3   | Validation & Verification Processes                                           |                                                                |
+| Oct. 3        |  4   | Analytical & Simulation Testing, Type 1/2 Testing                             | OV-1, Project Charter, MOEs                                    |
 | Oct. 10       |  5   | Type 3/4 Testing                                                              | Pre. IMS, Functional Arch, TPMs                                |
 | Oct. 17       |  6   | Voice of Customer / Requirements Definition                                   | Pre. RVTM, Component Specifications                            |
 | Oct. 24       |  7   | Mid-term Presentations                                                        |                                                                |
