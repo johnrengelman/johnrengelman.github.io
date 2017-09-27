@@ -1,6 +1,6 @@
 ---
 layout: page
-title: ETLS 509 - V&V (Fall 2016) Interesting Links
+title: ETLS 509 - V&V (Fall 2017) Interesting Links
 ---
 
 * Case Studies
