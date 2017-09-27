@@ -66,13 +66,13 @@ This course considers validation and verification across the system boundary of 
 * _The Art of Systems Engineering: A How-To Guide for Systems Engineers_, Beck & Monson, [https://www.amazon.com/Art-Systems-Engineering-How-Engineers/dp/0998144223](https://www.amazon.com/Art-Systems-Engineering-How-Engineers/dp/0998144223)
 * _Guide to the Systems Engineering Body of Knowledge (SEBoK)_, Version 1.3 released May 2014.
   The Systems Engineering Book of Knowledge can be downloaded free of charge at:
-  [http://www.sebokwiki.org/w/downloads/SEBoKv1.3_full.pdf](http://www.sebokwiki.org/w/downloads/SEBoKv1.3_full.pdd)
+  [http://sebokwiki.org/w/downloads/SEBoKv1.3_full.pdf](http://sebokwiki.org/w/downloads/SEBoKv1.3_full.pdf)
   The Engineering Book of Knowledge can also be viewed via its wiki interface at:
-  [http://www.sebokwiki.org/wiki/Main_Page](http://www.sebokwiki.org/wiki/Main_Page)
+  [http://sebokwiki.org/wiki/Guide_to_the_Systems_Engineering_Body_of_Knowledge_(SEBoK)](http://sebokwiki.org/wiki/Guide_to_the_Systems_Engineering_Body_of_Knowledge_(SEBoK))
 * “Technical Measurement; A collaborative Project of PSM, INCOSE and Industry,” December 2005, INCOSE-TP-2003-020-01, which can be downloaded free of charge at:
-  [https://www.incose.org/ProductsPubs/pdf/TechMeasurementGuide_2005-1227.pdf](https://www.incose.org/ProductsPubs/pdf/TechMeasurementGuide_2005-1227.pdf)
+  [http://www.psmsc.com/Downloads/TechnologyPapers/TechnicalMeasurementGuide_v1.0.pdf ](http://www.psmsc.com/Downloads/TechnologyPapers/TechnicalMeasurementGuide_v1.0.pdf )
 * _A Systems Engineering Capability Maturity Model_, Version 1.1
-  [http://resources.sei.cmu.edu/library/asset-view.cfm?assetid=12291](https://www.incose.org/ProductsPubs/pdf/TechMeasurementGuide_2005-1227.pdf)
+  [http://resources.sei.cmu.edu/library/asset-view.cfm?assetid=12291](http://resources.sei.cmu.edu/library/asset-view.cfm?assetid=12291)
   Some engineering organizations utilize a systems engineering capability maturity model as part of the documentation of their system’s engineering processes.  Capability models will not be covered within this course as the use of such models is principally sought for organizations dealing with the US Department of Defense.  It is mentioned here as a reference for students that may work in such organizations.
 
 ## Course Objectives
