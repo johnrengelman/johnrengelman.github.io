@@ -21,7 +21,7 @@
     ga('create', 'UA-321220-4', 'auto');
     ga('send', 'pageview');
   </script>
-  <link href='/stylesheets/all-b01009d3e5fab0595006e4f662fb5475.css' media='all' rel='stylesheet' type='text/css'>
+  <link href='/stylesheets/all-601383b01fb48c70bd3527f137965992.css' media='all' rel='stylesheet' type='text/css'>
 </head>
 
   <body>
@@ -48,15 +48,21 @@
           
         
           
-        
-          
-          <a class="page-link" href="/projects/index.html">Open Source Projects</a>
+          <a class="page-link" href="/projects/">Open Source Projects</a>
           
         
           
         
           
-          <a class="page-link" href="/courses/index.html">SysEng Courses</a>
+        
+          
+          <a class="page-link" href="/courses/">SysEng Courses</a>
+          
+        
+          
+        
+          
+        
           
         
           
@@ -104,15 +110,15 @@
   <article class="post-content">
     <p>I’ve recently started to work on contributing patches to the Grails Framework project. I’ve been lucky enough to be working for a client that is ok with using the latest versions of Grails for its back-end applications, so I’ve been able to play around a lot with Grails 2.0.0 since it’s release at the end of last year. However, this has resulted in me encountering a number of unexpected/irritating bugs that have sometimes prevented code from being migrated “as-is”. So, I’ve decided to try and learn and contribute back by working on some bugs myself.</p>
 
-<p>If you’re looking to contribute yourself, start here <a href="http://grails.org/Contribute.">http://grails.org/Contribute.</a> I didn’t have any issues getting up and running with my own fork of grails-core. I did have to execute a <code>./gradlew compile</code> task though before I was able to get any test to execute…and don’t worry, when this takes a while. There are <strong>A LOT</strong> of dependencies to download.</p>
+<p>If you’re looking to contribute yourself, start here <a href="http://grails.org/Contribute.">http://grails.org/Contribute.</a> I didn’t have any issues getting up and running with my own fork of grails-core. I did have to execute a <code class="highlighter-rouge">./gradlew compile</code> task though before I was able to get any test to execute…and don’t worry, when this takes a while. There are <strong>A LOT</strong> of dependencies to download.</p>
 
-<p>My next step was to start using IntelliJ 11 since it would allow me to quickly debug failing tests, so I again returned to the grails.org website and found the executing the <code>./gradlew idea</code> task will produce the necessary IntelliJ project files…Excellent. But this is where the problems started.</p>
+<p>My next step was to start using IntelliJ 11 since it would allow me to quickly debug failing tests, so I again returned to the grails.org website and found the executing the <code class="highlighter-rouge">./gradlew idea</code> task will produce the necessary IntelliJ project files…Excellent. But this is where the problems started.</p>
 
-<p>First, I had to open the Module Settings for <code>grails-script</code> and remove the entry under ‘Source Folders’. This was causing IntelliJ to not save any edits I made to the module properties. It appears that this entry isn’t needed anyway (and I haven’t run into any issues with it yet).</p>
+<p>First, I had to open the Module Settings for <code class="highlighter-rouge">grails-script</code> and remove the entry under ‘Source Folders’. This was causing IntelliJ to not save any edits I made to the module properties. It appears that this entry isn’t needed anyway (and I haven’t run into any issues with it yet).</p>
 
-<p>Second, the project wouldn’t compile because the following 2 classes couldn’t be found:<code>com.springsource.loaded.ReloadEventProcessorPlugin</code> and <code>com.springsource.loaded.Plugins</code>. After some searching, I found the <code>springloaded-core-1.0.2.jar</code> in my Gradle User Home (<code>~/.gradle</code>) directory (look under <code>~/.gradle/caches/artifacts-7</code>, it maybe be something different then <code>artifact-7</code>). I copied this jar to my home directory, opened the Module Settings for <code>grails-core-grails-core</code> and added a Jar Dependency that pointed to the <code>springloaded-core-1.0.2.jar</code> in my home directory.</p>
+<p>Second, the project wouldn’t compile because the following 2 classes couldn’t be found:<code class="highlighter-rouge">com.springsource.loaded.ReloadEventProcessorPlugin</code> and <code class="highlighter-rouge">com.springsource.loaded.Plugins</code>. After some searching, I found the <code class="highlighter-rouge">springloaded-core-1.0.2.jar</code> in my Gradle User Home (<code class="highlighter-rouge">~/.gradle</code>) directory (look under <code class="highlighter-rouge">~/.gradle/caches/artifacts-7</code>, it maybe be something different then <code class="highlighter-rouge">artifact-7</code>). I copied this jar to my home directory, opened the Module Settings for <code class="highlighter-rouge">grails-core-grails-core</code> and added a Jar Dependency that pointed to the <code class="highlighter-rouge">springloaded-core-1.0.2.jar</code> in my home directory.</p>
 
-<p>Third, the <code>grails-plugin-validation</code> module won’t compile because it was missing a dependency to the <code>grails-web</code> module. Again, I opened the Module Settings for <code>grails-plugin-validation</code> and added a Module Dependency to <code>grails-web</code>.</p>
+<p>Third, the <code class="highlighter-rouge">grails-plugin-validation</code> module won’t compile because it was missing a dependency to the <code class="highlighter-rouge">grails-web</code> module. Again, I opened the Module Settings for <code class="highlighter-rouge">grails-plugin-validation</code> and added a Module Dependency to <code class="highlighter-rouge">grails-web</code>.</p>
 
 <p>Now, I can finally run and debug my tests and get working on some patches.</p>
 
