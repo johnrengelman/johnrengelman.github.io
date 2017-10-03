@@ -21,7 +21,7 @@
     ga('create', 'UA-321220-4', 'auto');
     ga('send', 'pageview');
   </script>
-  <link href='/stylesheets/all-601383b01fb48c70bd3527f137965992.css' media='all' rel='stylesheet' type='text/css'>
+  <link href='/stylesheets/all-b01009d3e5fab0595006e4f662fb5475.css' media='all' rel='stylesheet' type='text/css'>
 </head>
 
   <body>
@@ -48,15 +48,15 @@
           
         
           
-          <a class="page-link" href="/projects/">Open Source Projects</a>
+        
+          
+          <a class="page-link" href="/projects/index.html">Open Source Projects</a>
           
         
           
         
           
-        
-          
-          <a class="page-link" href="/courses/">SysEng Courses</a>
+          <a class="page-link" href="/courses/index.html">SysEng Courses</a>
           
         
           
@@ -118,8 +118,8 @@
 
 <figure class="code-highlight-figure"><div class="code-highlight"><pre class="code-highlight-pre"><div data-line="1" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="n">jar</span> <span class="o">&#x7b;</span>
 </div></div><div data-line="2" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="n">doLast</span> <span class="o">&#x7b;</span>
-</div></div><div data-line="3" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="kt">long</span> <span class="n">ts</span> <span class="o">=</span> <span class="n">fileTree</span><span class="o">(</span><span class="s1">'.'</span><span class="o">)</span> <span class="o">&#x7b;</span>
-</div></div><div data-line="4" class="code-highlight-row numbered"><div class="code-highlight-line">      <span class="n">exclude</span> <span class="s1">'build/**'</span>
+</div></div><div data-line="3" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="kt">long</span> <span class="n">ts</span> <span class="o">=</span> <span class="n">fileTree</span><span class="o">(</span><span class="s1">&#39;.&#39;</span><span class="o">)</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="4" class="code-highlight-row numbered"><div class="code-highlight-line">      <span class="n">exclude</span> <span class="s1">&#39;build/**&#39;</span>
 </div></div><div data-line="5" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="o">&#x7d;.</span><span class="na">files</span><span class="o">.</span><span class="na">sort</span> <span class="o">&#x7b;</span>
 </div></div><div data-line="6" class="code-highlight-row numbered"><div class="code-highlight-line">      <span class="o">-(</span><span class="n">it</span><span class="o">.</span><span class="na">lastModified</span><span class="o">())</span>
 </div></div><div data-line="7" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="o">&#x7d;.</span><span class="na">first</span><span class="o">().</span><span class="na">lastModified</span><span class="o">()</span>
@@ -137,12 +137,12 @@
 
 <figure class="code-highlight-figure"><div class="code-highlight"><pre class="code-highlight-pre"><div data-line="1" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="n">jar</span> <span class="o">&#x7b;</span>
 </div></div><div data-line="2" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="n">doLast</span> <span class="o">&#x7b;</span>
-</div></div><div data-line="3" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="kt">long</span> <span class="n">ts</span> <span class="o">=</span> <span class="n">fileTree</span><span class="o">(</span><span class="s1">'.'</span><span class="o">)</span> <span class="o">&#x7b;</span>
-</div></div><div data-line="4" class="code-highlight-row numbered"><div class="code-highlight-line">      <span class="n">exclude</span> <span class="s1">'build/**'</span>
+</div></div><div data-line="3" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="kt">long</span> <span class="n">ts</span> <span class="o">=</span> <span class="n">fileTree</span><span class="o">(</span><span class="s1">&#39;.&#39;</span><span class="o">)</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="4" class="code-highlight-row numbered"><div class="code-highlight-line">      <span class="n">exclude</span> <span class="s1">&#39;build/**&#39;</span>
 </div></div><div data-line="5" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="o">&#x7d;.</span><span class="na">files</span><span class="o">.</span><span class="na">sort</span> <span class="o">&#x7b;</span>
 </div></div><div data-line="6" class="code-highlight-row numbered"><div class="code-highlight-line">      <span class="o">-(</span><span class="n">it</span><span class="o">.</span><span class="na">lastModified</span><span class="o">())</span>
 </div></div><div data-line="7" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="o">&#x7d;.</span><span class="na">first</span><span class="o">().</span><span class="na">lastModified</span><span class="o">()</span>
-</div></div><div data-line="8" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">File</span> <span class="n">newJar</span> <span class="o">=</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="n">archivePath</span><span class="o">.</span><span class="na">parent</span><span class="o">,</span> <span class="s1">'new-'</span> <span class="o">+</span> <span class="n">archiveName</span><span class="o">)</span>
+</div></div><div data-line="8" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">File</span> <span class="n">newJar</span> <span class="o">=</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="n">archivePath</span><span class="o">.</span><span class="na">parent</span><span class="o">,</span> <span class="s1">&#39;new-&#39;</span> <span class="o">+</span> <span class="n">archiveName</span><span class="o">)</span>
 </div></div><div data-line="9" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">JarOutputStream</span> <span class="n">jos</span> <span class="o">=</span> <span class="k">new</span> <span class="n">JarOutputStream</span><span class="o">(</span><span class="k">new</span> <span class="n">FileOutputStream</span><span class="o">(</span><span class="n">newJar</span><span class="o">))</span>
 </div></div><div data-line="10" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">JarFile</span> <span class="n">jf</span> <span class="o">=</span> <span class="k">new</span> <span class="n">JarFile</span><span class="o">(</span><span class="n">archivePath</span><span class="o">)</span>
 </div></div><div data-line="11" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">jf</span><span class="o">.</span><span class="na">entries</span><span class="o">().</span><span class="na">each</span> <span class="o">&#x7b;</span> <span class="n">entry</span> <span class="o">-&gt;</span>
@@ -169,20 +169,20 @@
 
 <h2 id="problem-2---jar-magic-extra-byte">Problem 2 - JAR “Magic” Extra Byte</h2>
 
-<p>The next issue I encountered was that my new Jar file always had an entry that didn’t match the original Jar for it’s ‘extra’ property. <code class="highlighter-rouge">JarEntry.geExtra()</code> returns a <code class="highlighter-rouge">byte[]</code>. In the orignal file, this was null, but in my copied file it was set to some data. I finally found that it is from the implementation of <a href="http://grepcode.com/file/repository.grepcode.com/java/root/jdk/openjdk/7-b147/java/util/jar/JarOutputStream.java">JarOutputStream</a> in Java.</p>
+<p>The next issue I encountered was that my new Jar file always had an entry that didn’t match the original Jar for it’s ‘extra’ property. <code>JarEntry.geExtra()</code> returns a <code>byte[]</code>. In the orignal file, this was null, but in my copied file it was set to some data. I finally found that it is from the implementation of <a href="http://grepcode.com/file/repository.grepcode.com/java/root/jdk/openjdk/7-b147/java/util/jar/JarOutputStream.java">JarOutputStream</a> in Java.</p>
 
 <p>This Jar MAGIC byte gets added to the first entry in the Jar file. I haven’t been able to find any documentation on what it is for, but a friend thought it was likely for the Jar tool itself to determine if an archive file is actually a Jar.</p>
 
-<p>Curiously, Jar files produced by the Gradle Jar task, do <strong>NOT</strong> have this magic byte. Digging into their code, I found that they use a <code class="highlighter-rouge">ZipOutputStream</code> to write out the Jar file which doesn’t have this magic byte code. Using <code class="highlighter-rouge">ZipOutputStream</code> and <code class="highlighter-rouge">ZipEntry</code> works just as fine and avoids this, so we update the build to do the same:</p>
+<p>Curiously, Jar files produced by the Gradle Jar task, do <strong>NOT</strong> have this magic byte. Digging into their code, I found that they use a <code>ZipOutputStream</code> to write out the Jar file which doesn’t have this magic byte code. Using <code>ZipOutputStream</code> and <code>ZipEntry</code> works just as fine and avoids this, so we update the build to do the same:</p>
 
 <figure class="code-highlight-figure"><div class="code-highlight"><pre class="code-highlight-pre"><div data-line="1" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="n">jar</span> <span class="o">&#x7b;</span>
 </div></div><div data-line="2" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="n">doLast</span> <span class="o">&#x7b;</span>
-</div></div><div data-line="3" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="kt">long</span> <span class="n">ts</span> <span class="o">=</span> <span class="n">fileTree</span><span class="o">(</span><span class="s1">'.'</span><span class="o">)</span> <span class="o">&#x7b;</span>
-</div></div><div data-line="4" class="code-highlight-row numbered"><div class="code-highlight-line">      <span class="n">exclude</span> <span class="s1">'build/**'</span>
+</div></div><div data-line="3" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="kt">long</span> <span class="n">ts</span> <span class="o">=</span> <span class="n">fileTree</span><span class="o">(</span><span class="s1">&#39;.&#39;</span><span class="o">)</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="4" class="code-highlight-row numbered"><div class="code-highlight-line">      <span class="n">exclude</span> <span class="s1">&#39;build/**&#39;</span>
 </div></div><div data-line="5" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="o">&#x7d;.</span><span class="na">files</span><span class="o">.</span><span class="na">sort</span> <span class="o">&#x7b;</span>
 </div></div><div data-line="6" class="code-highlight-row numbered"><div class="code-highlight-line">      <span class="o">-(</span><span class="n">it</span><span class="o">.</span><span class="na">lastModified</span><span class="o">())</span>
 </div></div><div data-line="7" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="o">&#x7d;.</span><span class="na">first</span><span class="o">().</span><span class="na">lastModified</span><span class="o">()</span>
-</div></div><div data-line="8" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">File</span> <span class="n">newJar</span> <span class="o">=</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="n">archivePath</span><span class="o">.</span><span class="na">parent</span><span class="o">,</span> <span class="s1">'new-'</span> <span class="o">+</span> <span class="n">archiveName</span><span class="o">)</span>
+</div></div><div data-line="8" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">File</span> <span class="n">newJar</span> <span class="o">=</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="n">archivePath</span><span class="o">.</span><span class="na">parent</span><span class="o">,</span> <span class="s1">&#39;new-&#39;</span> <span class="o">+</span> <span class="n">archiveName</span><span class="o">)</span>
 </div></div><div data-line="9" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">ZipOutputStream</span> <span class="n">zos</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ZipOutputStream</span><span class="o">(</span><span class="k">new</span> <span class="n">FileOutputStream</span><span class="o">(</span><span class="n">newJar</span><span class="o">))</span>
 </div></div><div data-line="10" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">JarFile</span> <span class="n">jf</span> <span class="o">=</span> <span class="k">new</span> <span class="n">JarFile</span><span class="o">(</span><span class="n">archivePath</span><span class="o">)</span>
 </div></div><div data-line="11" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">jf</span><span class="o">.</span><span class="na">entries</span><span class="o">().</span><span class="na">each</span> <span class="o">&#x7b;</span> <span class="n">entry</span> <span class="o">-&gt;</span>
@@ -213,12 +213,12 @@
 
 <figure class="code-highlight-figure"><div class="code-highlight"><pre class="code-highlight-pre"><div data-line="1" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="n">jar</span> <span class="o">&#x7b;</span>
 </div></div><div data-line="2" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="n">doLast</span> <span class="o">&#x7b;</span>
-</div></div><div data-line="3" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="kt">long</span> <span class="n">ts</span> <span class="o">=</span> <span class="n">fileTree</span><span class="o">(</span><span class="s1">'.'</span><span class="o">)</span> <span class="o">&#x7b;</span>
-</div></div><div data-line="4" class="code-highlight-row numbered"><div class="code-highlight-line">      <span class="n">exclude</span> <span class="s1">'build/**'</span>
+</div></div><div data-line="3" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="kt">long</span> <span class="n">ts</span> <span class="o">=</span> <span class="n">fileTree</span><span class="o">(</span><span class="s1">&#39;.&#39;</span><span class="o">)</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="4" class="code-highlight-row numbered"><div class="code-highlight-line">      <span class="n">exclude</span> <span class="s1">&#39;build/**&#39;</span>
 </div></div><div data-line="5" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="o">&#x7d;.</span><span class="na">files</span><span class="o">.</span><span class="na">sort</span> <span class="o">&#x7b;</span>
 </div></div><div data-line="6" class="code-highlight-row numbered"><div class="code-highlight-line">      <span class="o">-(</span><span class="n">it</span><span class="o">.</span><span class="na">lastModified</span><span class="o">())</span>
 </div></div><div data-line="7" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="o">&#x7d;.</span><span class="na">first</span><span class="o">().</span><span class="na">lastModified</span><span class="o">()</span>
-</div></div><div data-line="8" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">File</span> <span class="n">newJar</span> <span class="o">=</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="n">archivePath</span><span class="o">.</span><span class="na">parent</span><span class="o">,</span> <span class="s1">'new-'</span> <span class="o">+</span> <span class="n">archiveName</span><span class="o">)</span>
+</div></div><div data-line="8" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">File</span> <span class="n">newJar</span> <span class="o">=</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="n">archivePath</span><span class="o">.</span><span class="na">parent</span><span class="o">,</span> <span class="s1">&#39;new-&#39;</span> <span class="o">+</span> <span class="n">archiveName</span><span class="o">)</span>
 </div></div><div data-line="9" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">ZipOutputStream</span> <span class="n">zos</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ZipOutputStream</span><span class="o">(</span><span class="k">new</span> <span class="n">FileOutputStream</span><span class="o">(</span><span class="n">newJar</span><span class="o">))</span>
 </div></div><div data-line="10" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">JarFile</span> <span class="n">jf</span> <span class="o">=</span> <span class="k">new</span> <span class="n">JarFile</span><span class="o">(</span><span class="n">archivePath</span><span class="o">)</span>
 </div></div><div data-line="11" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">jf</span><span class="o">.</span><span class="na">entries</span><span class="o">().</span><span class="na">each</span> <span class="o">&#x7b;</span> <span class="n">entry</span> <span class="o">-&gt;</span>
@@ -268,19 +268,19 @@
 <p>After a call out to the Twitterverse, a friend pointed out that the <a href="http://ant.apache.org/manual/Tasks/zip.html">Zip Spec</a> specifies that Zip entries have a time resolution of 2 seconds:</p>
 
 <blockquote>
-  <p>The <code class="highlighter-rouge">update</code> parameter controls what happens if the ZIP file already exists. When set to <code class="highlighter-rouge">yes</code>, the ZIP file is updated with the files specified. (New files are added; old files are replaced with the new versions.) When set to <code class="highlighter-rouge">no</code> (the default) the ZIP file is overwritten if any of the files that would be added to the archive are newer than the entries inside the archive. Please note that ZIP files store file modification times with a granularity of two seconds. If a file is less than two seconds newer than the entry in the archive, Apache Ant will not consider it newer.</p>
+  <p>The <code>update</code> parameter controls what happens if the ZIP file already exists. When set to <code>yes</code>, the ZIP file is updated with the files specified. (New files are added; old files are replaced with the new versions.) When set to <code>no</code> (the default) the ZIP file is overwritten if any of the files that would be added to the archive are newer than the entries inside the archive. Please note that ZIP files store file modification times with a granularity of two seconds. If a file is less than two seconds newer than the entry in the archive, Apache Ant will not consider it newer.</p>
 </blockquote>
 
 <p>So, we need to mimic this same behavior when producing our new Jar. Basically, we need to convert our timestamp to a resolution of 2 seconds. It looks like this:</p>
 
 <figure class="code-highlight-figure"><div class="code-highlight"><pre class="code-highlight-pre"><div data-line="1" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="n">jar</span> <span class="o">&#x7b;</span>
 </div></div><div data-line="2" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="n">doLast</span> <span class="o">&#x7b;</span>
-</div></div><div data-line="3" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="kt">long</span> <span class="n">ts</span> <span class="o">=</span> <span class="n">fileTree</span><span class="o">(</span><span class="s1">'.'</span><span class="o">)</span> <span class="o">&#x7b;</span>
-</div></div><div data-line="4" class="code-highlight-row numbered"><div class="code-highlight-line">      <span class="n">exclude</span> <span class="s1">'build/**'</span>
+</div></div><div data-line="3" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="kt">long</span> <span class="n">ts</span> <span class="o">=</span> <span class="n">fileTree</span><span class="o">(</span><span class="s1">&#39;.&#39;</span><span class="o">)</span> <span class="o">&#x7b;</span>
+</div></div><div data-line="4" class="code-highlight-row numbered"><div class="code-highlight-line">      <span class="n">exclude</span> <span class="s1">&#39;build/**&#39;</span>
 </div></div><div data-line="5" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="o">&#x7d;.</span><span class="na">files</span><span class="o">.</span><span class="na">sort</span> <span class="o">&#x7b;</span>
 </div></div><div data-line="6" class="code-highlight-row numbered"><div class="code-highlight-line">      <span class="o">-(</span><span class="n">it</span><span class="o">.</span><span class="na">lastModified</span><span class="o">())</span>
 </div></div><div data-line="7" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="o">&#x7d;.</span><span class="na">first</span><span class="o">().</span><span class="na">lastModified</span><span class="o">()</span>
-</div></div><div data-line="8" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">File</span> <span class="n">newJar</span> <span class="o">=</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="n">archivePath</span><span class="o">.</span><span class="na">parent</span><span class="o">,</span> <span class="s1">'new-'</span> <span class="o">+</span> <span class="n">archiveName</span><span class="o">)</span>
+</div></div><div data-line="8" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">File</span> <span class="n">newJar</span> <span class="o">=</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="n">archivePath</span><span class="o">.</span><span class="na">parent</span><span class="o">,</span> <span class="s1">&#39;new-&#39;</span> <span class="o">+</span> <span class="n">archiveName</span><span class="o">)</span>
 </div></div><div data-line="9" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">ZipOutputStream</span> <span class="n">zos</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ZipOutputStream</span><span class="o">(</span><span class="k">new</span> <span class="n">FileOutputStream</span><span class="o">(</span><span class="n">newJar</span><span class="o">))</span>
 </div></div><div data-line="10" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">JarFile</span> <span class="n">jf</span> <span class="o">=</span> <span class="k">new</span> <span class="n">JarFile</span><span class="o">(</span><span class="n">archivePath</span><span class="o">)</span>
 </div></div><div data-line="11" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">jf</span><span class="o">.</span><span class="na">entries</span><span class="o">().</span><span class="na">each</span> <span class="o">&#x7b;</span> <span class="n">entry</span> <span class="o">-&gt;</span>
@@ -334,7 +334,7 @@
 </div></div><div data-line="64" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="o">&#x7d;</span>
 </div></div><div data-line="65" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="o">&#x7d;</span></div></div></pre></div></figure>
 
-<h2 id="problem-4---groovy-_timestamp-static-field">Problem 4 - Groovy <code class="highlighter-rouge">_timestamp</code> static field</h2>
+<h2 id="problem-4---groovy-timestamp-static-field">Problem 4 - Groovy <code>_timestamp</code> static field</h2>
 
 <p>This got my Jars closer, but they still weren’t checksumming the same. At this point, I started using a hex viewer to compare the two files. I used <a href="http://ridiculousfish.com/hexfiend/">Hex Fiend</a> because it can do a side by side diff of files and is free</p>
 
@@ -346,11 +346,11 @@
 
 <p><img src="/assets/hex2.png" alt="Hex View 2" /></p>
 
-<p>There was a binary difference in the class file produced by subsequent compilations. The difference was related to a filed named <code class="highlighter-rouge">__timestamp_239_neverHappen1387492963633</code></p>
+<p>There was a binary difference in the class file produced by subsequent compilations. The difference was related to a filed named <code>__timestamp_239_neverHappen1387492963633</code></p>
 
 <p>That’s an interesting field, because there’s nothing like that in my source file:</p>
 
-<figure class="code-highlight-figure"><div class="code-highlight"><pre class="code-highlight-pre"><div data-line="1" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="kn">package</span> <span class="nn">john.app</span>
+<figure class="code-highlight-figure"><div class="code-highlight"><pre class="code-highlight-pre"><div data-line="1" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="kn">package</span> <span class="n">john</span><span class="o">.</span><span class="na">app</span>
 </div></div><div data-line="2" class="code-highlight-row numbered"><div class="code-highlight-line"> </div></div><div data-line="3" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="kn">import</span> <span class="nn">john.lib.EchoUtil</span>
 </div></div><div data-line="4" class="code-highlight-row numbered"><div class="code-highlight-line"> </div></div><div data-line="5" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="kd">class</span> <span class="nc">EchoApp</span> <span class="o">&#x7b;</span>
 </div></div><div data-line="6" class="code-highlight-row numbered"><div class="code-highlight-line"> </div></div><div data-line="7" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">&#x7b;</span>
@@ -360,7 +360,7 @@
 </div></div><div data-line="11" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="o">&#x7d;</span>
 </div></div><div data-line="12" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="o">&#x7d;</span></div></div></pre></div></figure>
 
-<p>Opening the <code class="highlighter-rouge">.class</code> file with a Java Decompiler (JD-GUI in this case), we see this for the class:</p>
+<p>Opening the <code>.class</code> file with a Java Decompiler (JD-GUI in this case), we see this for the class:</p>
 
 <figure class="code-highlight-figure"><div class="code-highlight"><pre class="code-highlight-pre"><div data-line="1" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="kn">package</span> <span class="n">john</span><span class="o">.</span><span class="na">app</span><span class="o">;</span>
 </div></div><div data-line="2" class="code-highlight-row numbered"><div class="code-highlight-line"> </div></div><div data-line="3" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="kn">import</span> <span class="nn">groovy.lang.Closure</span><span class="o">;</span>
@@ -381,7 +381,7 @@
 </div></div><div data-line="19" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="o">&#x7d;</span>
 </div></div><div data-line="20" class="code-highlight-row numbered"><div class="code-highlight-line"> </div></div><div data-line="21" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span>
 </div></div><div data-line="22" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="o">&#x7b;</span>
-</div></div><div data-line="23" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">CallSite</span><span class="o">[]</span> <span class="n">arrayOfCallSite</span> <span class="o">=</span> <span class="n">$getCallSiteArray</span><span class="o">();</span> <span class="n">arrayOfCallSite</span><span class="o">[</span><span class="mi">0</span><span class="o">].</span><span class="na">call</span><span class="o">(</span><span class="n">args</span><span class="o">,</span> <span class="k">new</span> <span class="n">_main_closure1</span><span class="o">(</span><span class="n">EchoApp</span><span class="o">.</span><span class="na">class</span><span class="o">));</span> <span class="o">&#x7d;</span>
+</div></div><div data-line="23" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">CallSite</span><span class="o">[]</span> <span class="n">arrayOfCallSite</span> <span class="o">=</span> <span class="n">$getCallSiteArray</span><span class="o">();</span> <span class="n">arrayOfCallSite</span><span class="o">[</span><span class="mi">0</span><span class="o">].</span><span class="na">call</span><span class="o">(</span><span class="n">args</span><span class="o">,</span> <span class="k">new</span> <span class="nf">_main_closure1</span><span class="o">(</span><span class="n">EchoApp</span><span class="o">.</span><span class="na">class</span><span class="o">));</span> <span class="o">&#x7d;</span>
 </div></div><div data-line="24" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="kd">static</span> <span class="o">&#x7b;</span> <span class="n">__$swapInit</span><span class="o">();</span>
 </div></div><div data-line="25" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="kt">long</span> <span class="n">l1</span> <span class="o">=</span> <span class="mi">0L</span><span class="o">;</span>
 </div></div><div data-line="26" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="n">__timeStamp__239_neverHappen1387493347537</span> <span class="o">=</span> <span class="n">l1</span><span class="o">;</span>
@@ -411,7 +411,7 @@
 
 <p>Hmmm. That’s odd. A little more digging lead me to this <a href="https://jira.codehaus.org/browse/GROOVY-6308">Groovy-6308</a> - Timestamps in bytecode prevents baselining of code. The title of this bug is “Timestamps in bytecode prevents baselining of code”. Yup, this seems to be my problem.</p>
 
-<p>It appears this field is injected as some sort of addition to <code class="highlighter-rouge">SerialVersionUUID</code>, though the corresponding conversations of that bug and the related bugs seems to indicate that it’s not really used for anything.</p>
+<p>It appears this field is injected as some sort of addition to <code>SerialVersionUUID</code>, though the corresponding conversations of that bug and the related bugs seems to indicate that it’s not really used for anything.</p>
 
 <p>Unfortunately, the bugs are listed as being targeted for Groovy 3.0 which doesn’t help me in the near term.</p>
 

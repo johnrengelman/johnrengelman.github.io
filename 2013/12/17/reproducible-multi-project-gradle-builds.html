@@ -21,7 +21,7 @@
     ga('create', 'UA-321220-4', 'auto');
     ga('send', 'pageview');
   </script>
-  <link href='/stylesheets/all-601383b01fb48c70bd3527f137965992.css' media='all' rel='stylesheet' type='text/css'>
+  <link href='/stylesheets/all-b01009d3e5fab0595006e4f662fb5475.css' media='all' rel='stylesheet' type='text/css'>
 </head>
 
   <body>
@@ -48,15 +48,15 @@
           
         
           
-          <a class="page-link" href="/projects/">Open Source Projects</a>
+        
+          
+          <a class="page-link" href="/projects/index.html">Open Source Projects</a>
           
         
           
         
           
-        
-          
-          <a class="page-link" href="/courses/">SysEng Courses</a>
+          <a class="page-link" href="/courses/index.html">SysEng Courses</a>
           
         
           
@@ -125,7 +125,7 @@
   <li>Modify the resulting artifact to set the timestamp information for contents uniformly.</li>
 </ol>
 
-<p>After a quick Twitter conversation with <a href="http://twitter.com/ldaley">Luke Daley</a>, item 4 was knocked out by using Java’s <code class="highlighter-rouge">ZipFile</code> API to iterate over the jar’s contents and set the <code class="highlighter-rouge">lastModified</code> timestamp to a value, but that leaves the more critical timestamp calculations.</p>
+<p>After a quick Twitter conversation with <a href="http://twitter.com/ldaley">Luke Daley</a>, item 4 was knocked out by using Java’s <code>ZipFile</code> API to iterate over the jar’s contents and set the <code>lastModified</code> timestamp to a value, but that leaves the more critical timestamp calculations.</p>
 
 <p>Let’s start with a mind experiment to figure out what we need. Let’s assume we have the following Gradle project structure:</p>
 
@@ -135,7 +135,7 @@
 
 <p>This is a simple Gradle multi-project build where we have the application as one project and a utility library as another.</p>
 
-<p>We check this code out and run a <code class="highlighter-rouge">./gradlew build</code> and calculate an MD5 checksum on <code class="highlighter-rouge">utils.jar</code> and <code class="highlighter-rouge">app.jar</code>:</p>
+<p>We check this code out and run a <code>./gradlew build</code> and calculate an MD5 checksum on <code>utils.jar</code> and <code>app.jar</code>:</p>
 
 <table>
   <thead>
@@ -156,7 +156,7 @@
   </tbody>
 </table>
 
-<p>If I make a change to the <code class="highlighter-rouge">app</code> project and do a <code class="highlighter-rouge">./gradlew clean build</code>, we want the following to happen:</p>
+<p>If I make a change to the <code>app</code> project and do a <code>./gradlew clean build</code>, we want the following to happen:</p>
 
 <table>
   <thead>
@@ -177,9 +177,9 @@
   </tbody>
 </table>
 
-<p>In this scenario, only the <code class="highlighter-rouge">app.jar</code> checksum would change because the <code class="highlighter-rouge">utils</code> project is functionally equivalent.</p>
+<p>In this scenario, only the <code>app.jar</code> checksum would change because the <code>utils</code> project is functionally equivalent.</p>
 
-<p>However, if we start from our initial commit and change the <code class="highlighter-rouge">utils</code> project and do a <code class="highlighter-rouge">./gradlew clean build</code>, we want the following to happen:</p>
+<p>However, if we start from our initial commit and change the <code>utils</code> project and do a <code>./gradlew clean build</code>, we want the following to happen:</p>
 
 <table>
   <thead>
@@ -200,13 +200,13 @@
   </tbody>
 </table>
 
-<p>In this case with only a change to <code class="highlighter-rouge">utils</code>, we want both checksums to change because the <code class="highlighter-rouge">app</code> project is dependent upon the changed code in the utils library.</p>
+<p>In this case with only a change to <code>utils</code>, we want both checksums to change because the <code>app</code> project is dependent upon the changed code in the utils library.</p>
 
-<p>My initial thought was to use my VCS to get a timestamp for the latest change to the Gradle project being built. This would couple my build to the VCS being used, but that’s an okay dependency in my opinion. Alternatively, the build could scan over the source contents and get the latest <code class="highlighter-rouge">lastModified</code> timestamp of any file contained within.</p>
+<p>My initial thought was to use my VCS to get a timestamp for the latest change to the Gradle project being built. This would couple my build to the VCS being used, but that’s an okay dependency in my opinion. Alternatively, the build could scan over the source contents and get the latest <code>lastModified</code> timestamp of any file contained within.</p>
 
 <p>Neither of these solutions would solve the issue with upstream libraries however. Somehow, we need to propagate the upstream project’s information.</p>
 
-<p>I’m not sure there is a <em>nice</em> way to do this, but my current thinking is to simulate this meta information by enforcing a commit to downstream projects when an upstream is modified. In my particular case, I would likely change the project’s version of the upstream library by modifying the <code class="highlighter-rouge">build.gradle</code> file in that project. I could add a task that verifies that the downstream project has a version that is <em>at least</em> equivalent to any upstream projects’ versions. This could run as part of the standard build process. This would force a change to the downstream’s <code class="highlighter-rouge">build.gradle</code> thus indirectly updating the timestamp the VCS would report for that project.</p>
+<p>I’m not sure there is a <em>nice</em> way to do this, but my current thinking is to simulate this meta information by enforcing a commit to downstream projects when an upstream is modified. In my particular case, I would likely change the project’s version of the upstream library by modifying the <code>build.gradle</code> file in that project. I could add a task that verifies that the downstream project has a version that is <em>at least</em> equivalent to any upstream projects’ versions. This could run as part of the standard build process. This would force a change to the downstream’s <code>build.gradle</code> thus indirectly updating the timestamp the VCS would report for that project.</p>
 
 <p>All of this is theoretical at this point, I’ve only started working on an implementation. I’ll update this post as I learn more.</p>
 
