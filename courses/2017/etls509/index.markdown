@@ -31,3 +31,5 @@ s3: http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509
    1. Test & Evaluation Master Plan (TEMP)
    1. [777 Video](https://drive.google.com/open?id=0Bw7rxITbHNfSVkkweFNrY01fVUU)
    1. Project RFPs
+1. Week 4 - [Slides](../../2016/etls509/files/04_TEST_1_2.pdf)
+   1. [777 Video](https://drive.google.com/open?id=0Bw7rxITbHNfSN09hUzhSYlcxbDA)
