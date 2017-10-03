@@ -12,9 +12,9 @@ s3: http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509
 * [Project Outline](project_outline.html)
 * [Interesting Links](links.html)
 * Project RFPs
-  * [Automated Drone Delivery System](project_adds.md)
-  * [Drone Collision Detection & Avoidance System](project_cdas.md)
-  * [Automated Parking Attendant System](project_apa.md)
+  * [Automated Drone Delivery System](project_adds.html)
+  * [Drone Collision Detection & Avoidance System](project_cdas.html)
+  * [Automated Parking Attendant System](project_apa.html)
 
 # Lectures
 
