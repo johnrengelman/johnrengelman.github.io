@@ -33,3 +33,6 @@ s3: http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509
    1. Project RFPs
 1. Week 4 - [Slides](../../2016/etls509/files/04_TEST_1_2.pdf)
    1. [777 Video](https://drive.google.com/open?id=0Bw7rxITbHNfSN09hUzhSYlcxbDA)
+1. Week 5 - [Slides](../../2016/etls509/files/05_TEST_3_4.pdf)
+   1. [777 Video 1](https://drive.google.com/open?id=0Bw7rxITbHNfSUDQ3VlJKV0twZnM)
+   1. [777 Video 2](https://drive.google.com/open?id=0Bw7rxITbHNfSWGpPUTAzVlpVNjg)
