@@ -12,7 +12,7 @@ title: ETLS 509 - V&V (Fall 2017) Class Schedule
 | Oct. 10       |  5   | Type 3/4 Testing                                                              | Pre. IMS, Functional Arch, TPMs                                |
 | Oct. 17       |  6   | Voice of Customer / Requirements Definition                                   | Pre. RVTM, Component Specifications                            |
 | Oct. 24       |  7   | Mid-term Presentations                                                        |                                                                |
-| Oct. 31       |  8   | No Class                                                                      | Presentation Slides                                            |
+| Oct. 31       |  8   | No Class (Happy Halloween!)                                                   | Presentation Slides                                            |
 | Nov. 7        |  9   | Human Factory/Logistics & Supportability Engineering                          |                                                                |
 | Nov. 14       |  10  | Reliability, Maintainability, & Availability                                  | Test Strategy, HF requirements,                                |
 | Nov. 21       |  11  | Producibility, Disposability, and Sustainability                              | Baseline RM&A analysis, Test Templates, Corrective Action Plan |
