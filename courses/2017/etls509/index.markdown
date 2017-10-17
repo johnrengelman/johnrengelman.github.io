@@ -36,3 +36,6 @@ s3: http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509
 1. Week 5 - [Slides](../../2016/etls509/files/05_TEST_3_4.pdf)
    1. [777 Video 1](https://drive.google.com/open?id=0Bw7rxITbHNfSUDQ3VlJKV0twZnM)
    1. [777 Video 2](https://drive.google.com/open?id=0Bw7rxITbHNfSWGpPUTAzVlpVNjg)
+1. Week 6 - [Slides](../../2016/etls509/files/06_Reqs.pdf)
+   1. [777 Video 1](https://drive.google.com/open?id=0Bw7rxITbHNfSMjZncTVid0E2dFU)
+   1. [777 Video 2](https://drive.google.com/open?id=0Bw7rxITbHNfSZDB3YUZNMHdUd0E)
