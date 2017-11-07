@@ -39,3 +39,11 @@ s3: http://johnengelman-stu.s3-website-us-west-2.amazonaws.com/etls509
 1. Week 6 - [Slides](../../2016/etls509/files/06_Reqs.pdf)
    1. [777 Video 1](https://drive.google.com/open?id=0Bw7rxITbHNfSMjZncTVid0E2dFU)
    1. [777 Video 2](https://drive.google.com/open?id=0Bw7rxITbHNfSZDB3YUZNMHdUd0E)
+1. Week 7 - Midterm presentations
+1. Week 8 - No Class
+1. Week 9
+   1. [Human Factor Slides](../../2016/etls509/files/08_HumanFactors.pdf)
+   1. [777 Video](https://drive.google.com/open?id=0Bw7rxITbHNfSUGNmY0EzRFVIb2s)
+   1. [ILS Slides](../../2016/etls509/files/10_ILS.pdf)
+   1. [777 Video 1](https://drive.google.com/open?id=0Bw7rxITbHNfSQ052Y1R0eDlIdWs)
+   1. [777 Video 2](https://drive.google.com/open?id=0Bw7rxITbHNfSZzMtSkEzMTNGV3c)
